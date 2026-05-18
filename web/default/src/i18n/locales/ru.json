@@ -1,5 +1,6 @@
 {
   "translation": {
+    "and the": "и",
     "The administrator has not configured a top-up link yet.": "Администратор ещё не настроил ссылку пополнения.",
     "The top-up page could not be embedded (the target site may block iframes).": "Не удалось встроить страницу пополнения (сайт может блокировать iframe).",
     "Open in a new tab": "Открыть в новой вкладке",

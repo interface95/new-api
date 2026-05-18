@@ -1,5 +1,6 @@
 {
   "translation": {
+    "and the": "et",
     "The administrator has not configured a top-up link yet.": "L'administrateur n'a pas encore configuré de lien de recharge.",
     "The top-up page could not be embedded (the target site may block iframes).": "Impossible d'intégrer la page de recharge (le site cible bloque peut-être les iframes).",
     "Open in a new tab": "Ouvrir dans un nouvel onglet",

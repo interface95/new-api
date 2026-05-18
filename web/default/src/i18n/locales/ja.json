@@ -1,5 +1,6 @@
 {
   "translation": {
+    "and the": "および",
     "The administrator has not configured a top-up link yet.": "管理者がチャージリンクをまだ設定していません。",
     "The top-up page could not be embedded (the target site may block iframes).": "チャージページを埋め込めませんでした(対象サイトが iframe をブロックしている可能性)。",
     "Open in a new tab": "新しいタブで開く",

@@ -101,7 +101,16 @@ export function SignUpForm({
   const emailVerificationRequired = !!status?.email_verification
   const hasUserAgreement = Boolean(status?.user_agreement_enabled)
   const hasPrivacyPolicy = Boolean(status?.privacy_policy_enabled)
-  const requiresLegalConsent = hasUserAgreement || hasPrivacyPolicy
+  const hasDisclaimer = Boolean(
+    (status as unknown as Record<string, unknown> | null)?.disclaimer_enabled
+  )
+  const registerDisclaimerNotice =
+    (
+      (status as unknown as Record<string, unknown> | null)
+        ?.register_disclaimer_notice as string | undefined
+    )?.trim() || ''
+  const requiresLegalConsent =
+    hasUserAgreement || hasPrivacyPolicy || hasDisclaimer
   const oauthRegisterEnabled =
     status?.oauth_register_enabled ??
     status?.data?.oauth_register_enabled ??
@@ -221,6 +230,16 @@ export function SignUpForm({
         className={cn('grid gap-4', className)}
         {...props}
       >
+        {registerDisclaimerNotice && (
+          <div className='border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-700/40 dark:bg-amber-900/20 dark:text-amber-200 flex items-start gap-2 rounded-lg border px-4 py-3 text-sm'>
+            <span aria-hidden='true' className='text-base leading-5'>
+              🚫
+            </span>
+            <span className='whitespace-pre-wrap leading-5'>
+              {registerDisclaimerNotice}
+            </span>
+          </div>
+        )}
         {/* Username Field */}
         <FormField
           control={form.control}

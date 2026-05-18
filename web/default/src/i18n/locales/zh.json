@@ -1,5 +1,6 @@
 {
   "translation": {
+    "and the": "和",
     "The administrator has not configured a top-up link yet.": "管理员尚未配置充值链接。",
     "The top-up page could not be embedded (the target site may block iframes).": "充值页面无法嵌入显示(目标站点可能禁止 iframe)。",
     "Open in a new tab": "在新标签页打开",

@@ -38,8 +38,30 @@ export function LegalConsent({
   const { t } = useTranslation()
   const hasUserAgreement = Boolean(status?.user_agreement_enabled)
   const hasPrivacyPolicy = Boolean(status?.privacy_policy_enabled)
+  const hasDisclaimer = Boolean(
+    (status as unknown as Record<string, unknown> | null)?.disclaimer_enabled
+  )
 
-  if (!hasUserAgreement && !hasPrivacyPolicy) {
+  const links: { key: string; href: string; label: string }[] = []
+  if (hasUserAgreement) {
+    links.push({
+      key: 'ua',
+      href: '/user-agreement',
+      label: t('User Agreement'),
+    })
+  }
+  if (hasPrivacyPolicy) {
+    links.push({
+      key: 'pp',
+      href: '/privacy-policy',
+      label: t('Privacy Policy'),
+    })
+  }
+  if (hasDisclaimer) {
+    links.push({ key: 'dc', href: '/disclaimer', label: t('Disclaimer') })
+  }
+
+  if (links.length === 0) {
     return null
   }
 
@@ -66,27 +88,20 @@ export function LegalConsent({
       >
         <span>
           {t('I have read and agree to the')}{' '}
-          {hasUserAgreement && (
-            <a
-              href='/user-agreement'
-              target='_blank'
-              rel='noopener noreferrer'
-              className='text-primary hover:underline'
-            >
-              {t('User Agreement')}
-            </a>
-          )}
-          {hasUserAgreement && hasPrivacyPolicy && ' and the '}
-          {hasPrivacyPolicy && (
-            <a
-              href='/privacy-policy'
-              target='_blank'
-              rel='noopener noreferrer'
-              className='text-primary hover:underline'
-            >
-              {t('Privacy Policy')}
-            </a>
-          )}
+          {links.map((link, idx) => (
+            <span key={link.key}>
+              {idx > 0 &&
+                (idx === links.length - 1 ? ` ${t('and the')} ` : '、')}
+              <a
+                href={link.href}
+                target='_blank'
+                rel='noopener noreferrer'
+                className='text-primary hover:underline'
+              >
+                {link.label}
+              </a>
+            </span>
+          ))}
           .
         </span>
       </Label>
