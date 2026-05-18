@@ -1,5 +1,8 @@
 {
   "translation": {
+    "The administrator has not configured a top-up link yet.": "管理员尚未配置充值链接。",
+    "The top-up page could not be embedded (the target site may block iframes).": "充值页面无法嵌入显示(目标站点可能禁止 iframe)。",
+    "Open in a new tab": "在新标签页打开",
     "Top-Up": "充值",
     "Disclaimer": "免责声明",
     "Provide Markdown, HTML, or an external URL for the disclaimer": "为免责声明提供 Markdown、HTML 或外部 URL",

@@ -96,9 +96,11 @@ export function useTopNavLinks(): TopNavLink[] {
     }
   }
 
-  // Top-Up: show only when an admin-configured external URL exists
+  // Top-Up: show only when an admin-configured external URL exists.
+  // The tab routes to /topup (an internal page that iframes the URL) so the
+  // user stays inside the app shell instead of jumping to an external site.
   if (topUpLink && topUpLink.trim() !== '') {
-    links.push({ title: t('Top-Up'), href: topUpLink, external: true })
+    links.push({ title: t('Top-Up'), href: '/topup' })
   }
 
   // About

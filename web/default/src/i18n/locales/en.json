@@ -1,5 +1,8 @@
 {
   "translation": {
+    "The administrator has not configured a top-up link yet.": "The administrator has not configured a top-up link yet.",
+    "The top-up page could not be embedded (the target site may block iframes).": "The top-up page could not be embedded (the target site may block iframes).",
+    "Open in a new tab": "Open in a new tab",
     "Top-Up": "Top-Up",
     "Disclaimer": "Disclaimer",
     "Provide Markdown, HTML, or an external URL for the disclaimer": "Provide Markdown, HTML, or an external URL for the disclaimer",

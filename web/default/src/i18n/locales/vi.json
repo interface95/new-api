@@ -1,5 +1,8 @@
 {
   "translation": {
+    "The administrator has not configured a top-up link yet.": "Quản trị viên chưa cấu hình liên kết nạp tiền.",
+    "The top-up page could not be embedded (the target site may block iframes).": "Không thể nhúng trang nạp tiền (trang đích có thể chặn iframe).",
+    "Open in a new tab": "Mở trong tab mới",
     "Top-Up": "Nạp tiền",
     "Disclaimer": "Tuyên bố miễn trừ trách nhiệm",
     "Provide Markdown, HTML, or an external URL for the disclaimer": "Cung cấp Markdown, HTML hoặc URL bên ngoài cho tuyên bố miễn trừ",
