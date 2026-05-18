@@ -46,9 +46,11 @@ const SITE_SECTIONS = [
           About: settings.About,
           HomePageContent: settings.HomePageContent,
           ServerAddress: settings.ServerAddress,
+          RegisterDisclaimerNotice: settings.RegisterDisclaimerNotice,
           legal: {
             user_agreement: settings['legal.user_agreement'],
             privacy_policy: settings['legal.privacy_policy'],
+            disclaimer: settings['legal.disclaimer'],
           },
         }}
       />

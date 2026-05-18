@@ -57,9 +57,11 @@ const _systemInfoSchema = z.object({
   Footer: z.string().optional(),
   About: z.string().optional(),
   HomePageContent: z.string().optional(),
+  RegisterDisclaimerNotice: z.string().optional(),
   legal: z.object({
     user_agreement: z.string().optional(),
     privacy_policy: z.string().optional(),
+    disclaimer: z.string().optional(),
   }),
 })
 
@@ -89,9 +91,11 @@ export function SystemInfoSection({ defaultValues }: SystemInfoSectionProps) {
     Footer: normalizeValue(defaultValues.Footer),
     About: normalizeValue(defaultValues.About),
     HomePageContent: normalizeValue(defaultValues.HomePageContent),
+    RegisterDisclaimerNotice: normalizeValue(defaultValues.RegisterDisclaimerNotice),
     legal: {
       user_agreement: normalizeValue(defaultValues.legal?.user_agreement),
       privacy_policy: normalizeValue(defaultValues.legal?.privacy_policy),
+      disclaimer: normalizeValue(defaultValues.legal?.disclaimer),
     },
   }
 
@@ -107,9 +111,11 @@ export function SystemInfoSection({ defaultValues }: SystemInfoSectionProps) {
     Footer: z.string().optional(),
     About: z.string().optional(),
     HomePageContent: z.string().optional(),
+    RegisterDisclaimerNotice: z.string().optional(),
     legal: z.object({
       user_agreement: z.string().optional(),
       privacy_policy: z.string().optional(),
+      disclaimer: z.string().optional(),
     }),
   })
 
@@ -359,6 +365,54 @@ export function SystemInfoSection({ defaultValues }: SystemInfoSectionProps) {
                     {t(
                       'Leave empty to disable the privacy policy requirement. Supports Markdown, HTML, or a full URL to redirect users.'
                     )}
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name='legal.disclaimer'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('Disclaimer')}</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder={t(
+                        'Provide Markdown, HTML, or an external URL for the disclaimer'
+                      )}
+                      rows={6}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    {t(
+                      'Leave empty to hide the disclaimer link from the registration form.'
+                    )}
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name='RegisterDisclaimerNotice'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('Registration Notice')}</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder={t(
+                        'Shown as a banner on the registration page (e.g. service availability disclaimer).'
+                      )}
+                      rows={3}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    {t('Leave empty to hide the banner.')}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
