@@ -106,6 +106,8 @@ const RegisterForm = () => {
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [hasUserAgreement, setHasUserAgreement] = useState(false);
   const [hasPrivacyPolicy, setHasPrivacyPolicy] = useState(false);
+  const [hasDisclaimer, setHasDisclaimer] = useState(false);
+  const [registerDisclaimerNotice, setRegisterDisclaimerNotice] = useState('');
   const [githubButtonState, setGithubButtonState] = useState('idle');
   const [githubButtonDisabled, setGithubButtonDisabled] = useState(false);
   const githubTimeoutRef = useRef(null);
@@ -150,9 +152,11 @@ const RegisterForm = () => {
       setTurnstileSiteKey(status.turnstile_site_key);
     }
 
-    // 从 status 获取用户协议和隐私政策的启用状态
+    // 从 status 获取用户协议、隐私政策与免责声明的启用状态
     setHasUserAgreement(status?.user_agreement_enabled || false);
     setHasPrivacyPolicy(status?.privacy_policy_enabled || false);
+    setHasDisclaimer(status?.disclaimer_enabled || false);
+    setRegisterDisclaimerNotice(status?.register_disclaimer_notice || '');
   }, [status]);
 
   useEffect(() => {
@@ -572,6 +576,16 @@ const RegisterForm = () => {
               </Title>
             </div>
             <div className='px-2 py-8'>
+              {registerDisclaimerNotice && (
+                <div className='mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 flex items-start gap-2'>
+                  <span aria-hidden='true' className='text-base leading-5'>
+                    🚫
+                  </span>
+                  <span className='whitespace-pre-wrap leading-5'>
+                    {registerDisclaimerNotice}
+                  </span>
+                </div>
+              )}
               <Form className='space-y-3'>
                 <Form.Input
                   field='username'
@@ -637,43 +651,44 @@ const RegisterForm = () => {
                   </>
                 )}
 
-                {(hasUserAgreement || hasPrivacyPolicy) && (
-                  <div className='pt-4'>
-                    <Checkbox
-                      checked={agreedToTerms}
-                      onChange={(e) => setAgreedToTerms(e.target.checked)}
-                    >
-                      <Text size='small' className='text-gray-600'>
-                        {t('我已阅读并同意')}
-                        {hasUserAgreement && (
-                          <>
-                            <a
-                              href='/user-agreement'
-                              target='_blank'
-                              rel='noopener noreferrer'
-                              className='text-blue-600 hover:text-blue-800 mx-1'
-                            >
-                              {t('用户协议')}
-                            </a>
-                          </>
-                        )}
-                        {hasUserAgreement && hasPrivacyPolicy && t('和')}
-                        {hasPrivacyPolicy && (
-                          <>
-                            <a
-                              href='/privacy-policy'
-                              target='_blank'
-                              rel='noopener noreferrer'
-                              className='text-blue-600 hover:text-blue-800 mx-1'
-                            >
-                              {t('隐私政策')}
-                            </a>
-                          </>
-                        )}
-                      </Text>
-                    </Checkbox>
-                  </div>
-                )}
+                {(() => {
+                  const legalLinks = [];
+                  if (hasUserAgreement) {
+                    legalLinks.push({ href: '/user-agreement', label: t('用户协议'), key: 'ua' });
+                  }
+                  if (hasPrivacyPolicy) {
+                    legalLinks.push({ href: '/privacy-policy', label: t('隐私政策'), key: 'pp' });
+                  }
+                  if (hasDisclaimer) {
+                    legalLinks.push({ href: '/disclaimer', label: t('免责声明'), key: 'dc' });
+                  }
+                  if (legalLinks.length === 0) return null;
+                  return (
+                    <div className='pt-4'>
+                      <Checkbox
+                        checked={agreedToTerms}
+                        onChange={(e) => setAgreedToTerms(e.target.checked)}
+                      >
+                        <Text size='small' className='text-gray-600'>
+                          {t('我已阅读并同意')}
+                          {legalLinks.map((link, idx) => (
+                            <React.Fragment key={link.key}>
+                              {idx > 0 && (idx === legalLinks.length - 1 ? ` ${t('和')} ` : '、')}
+                              <a
+                                href={link.href}
+                                target='_blank'
+                                rel='noopener noreferrer'
+                                className='text-blue-600 hover:text-blue-800 mx-1'
+                              >
+                                {link.label}
+                              </a>
+                            </React.Fragment>
+                          ))}
+                        </Text>
+                      </Checkbox>
+                    </div>
+                  );
+                })()}
 
                 <div className='space-y-2 pt-2'>
                   <Button
@@ -684,7 +699,8 @@ const RegisterForm = () => {
                     onClick={handleSubmit}
                     loading={registerLoading}
                     disabled={
-                      (hasUserAgreement || hasPrivacyPolicy) && !agreedToTerms
+                      (hasUserAgreement || hasPrivacyPolicy || hasDisclaimer) &&
+                      !agreedToTerms
                     }
                   >
                     {t('注册')}

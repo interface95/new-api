@@ -116,6 +116,9 @@ func GetStatus(c *gin.Context) {
 		"setup":                       constant.Setup,
 		"user_agreement_enabled":      legalSetting.UserAgreement != "",
 		"privacy_policy_enabled":      legalSetting.PrivacyPolicy != "",
+		"disclaimer_enabled":          legalSetting.Disclaimer != "",
+		"register_disclaimer_notice":  common.RegisterDisclaimerNotice,
+		"topup_link":                  common.TopUpLink,
 		"checkin_enabled":             operation_setting.GetCheckinSetting().Enabled,
 	}
 
@@ -202,6 +205,15 @@ func GetPrivacyPolicy(c *gin.Context) {
 		"success": true,
 		"message": "",
 		"data":    system_setting.GetLegalSettings().PrivacyPolicy,
+	})
+	return
+}
+
+func GetDisclaimer(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "",
+		"data":    system_setting.GetLegalSettings().Disclaimer,
 	})
 	return
 }
