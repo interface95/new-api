@@ -56,6 +56,8 @@ export function useTopNavLinks(): TopNavLink[] {
 
   // Documentation link (may be external)
   const docsLink: string | undefined = status?.docs_link as string | undefined
+  // Top-up link (admin-configurable external URL)
+  const topUpLink: string | undefined = status?.topup_link as string | undefined
 
   const isAuthed = !!auth?.user
 
@@ -92,6 +94,11 @@ export function useTopNavLinks(): TopNavLink[] {
     } else {
       links.push({ title: t('Docs'), href: '/docs' })
     }
+  }
+
+  // Top-Up: show only when an admin-configured external URL exists
+  if (topUpLink && topUpLink.trim() !== '') {
+    links.push({ title: t('Top-Up'), href: topUpLink, external: true })
   }
 
   // About

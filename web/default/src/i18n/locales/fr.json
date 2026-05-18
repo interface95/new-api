@@ -1,5 +1,12 @@
 {
   "translation": {
+    "Top-Up": "Recharge",
+    "Disclaimer": "Avertissement",
+    "Provide Markdown, HTML, or an external URL for the disclaimer": "Fournissez du Markdown, du HTML ou une URL externe pour l'avertissement",
+    "Leave empty to hide the disclaimer link from the registration form.": "Laissez vide pour masquer le lien d'avertissement sur le formulaire d'inscription.",
+    "Registration Notice": "Avis sur la page d'inscription",
+    "Shown as a banner on the registration page (e.g. service availability disclaimer).": "Affiché en bannière sur la page d'inscription (par exemple un avis de disponibilité du service).",
+    "Leave empty to hide the banner.": "Laissez vide pour masquer la bannière.",
     "360": "360",
     "1000": "1000",
     "10000": "10000",

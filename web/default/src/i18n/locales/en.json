@@ -1,5 +1,12 @@
 {
   "translation": {
+    "Top-Up": "Top-Up",
+    "Disclaimer": "Disclaimer",
+    "Provide Markdown, HTML, or an external URL for the disclaimer": "Provide Markdown, HTML, or an external URL for the disclaimer",
+    "Leave empty to hide the disclaimer link from the registration form.": "Leave empty to hide the disclaimer link from the registration form.",
+    "Registration Notice": "Registration Notice",
+    "Shown as a banner on the registration page (e.g. service availability disclaimer).": "Shown as a banner on the registration page (e.g. service availability disclaimer).",
+    "Leave empty to hide the banner.": "Leave empty to hide the banner.",
     "360": "360",
     "1000": "1000",
     "10000": "10000",

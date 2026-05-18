@@ -1,5 +1,12 @@
 {
   "translation": {
+    "Top-Up": "チャージ",
+    "Disclaimer": "免責事項",
+    "Provide Markdown, HTML, or an external URL for the disclaimer": "免責事項として Markdown、HTML、または外部 URL を入力してください",
+    "Leave empty to hide the disclaimer link from the registration form.": "空のままにすると登録フォームの免責事項リンクが非表示になります。",
+    "Registration Notice": "登録ページの通知",
+    "Shown as a banner on the registration page (e.g. service availability disclaimer).": "登録ページにバナーとして表示されます(例: サービス利用可否の注意)。",
+    "Leave empty to hide the banner.": "空のままにするとバナーは非表示になります。",
     "360": "360",
     "1000": "1000",
     "10000": "10000",

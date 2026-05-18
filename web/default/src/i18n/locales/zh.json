@@ -1,5 +1,12 @@
 {
   "translation": {
+    "Top-Up": "充值",
+    "Disclaimer": "免责声明",
+    "Provide Markdown, HTML, or an external URL for the disclaimer": "为免责声明提供 Markdown、HTML 或外部 URL",
+    "Leave empty to hide the disclaimer link from the registration form.": "留空以在注册页面隐藏免责声明链接。",
+    "Registration Notice": "注册页提示",
+    "Shown as a banner on the registration page (e.g. service availability disclaimer).": "作为横幅显示在注册页面上(例如服务可用性免责声明)。",
+    "Leave empty to hide the banner.": "留空以隐藏横幅。",
     "360": "360",
     "1000": "1000",
     "10000": "10000",
