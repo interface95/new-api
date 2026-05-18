@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2023-2026 QuantumNous
+Copyright (C) 2025 QuantumNous
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -16,20 +16,22 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { api } from '@/lib/api'
-import type { LegalDocumentResponse } from './types'
 
-export async function getUserAgreement() {
-  const res = await api.get<LegalDocumentResponse>('/api/user-agreement')
-  return res.data
-}
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import DocumentRenderer from '../../components/common/DocumentRenderer';
 
-export async function getPrivacyPolicy() {
-  const res = await api.get<LegalDocumentResponse>('/api/privacy-policy')
-  return res.data
-}
+const Disclaimer = () => {
+  const { t } = useTranslation();
 
-export async function getDisclaimer() {
-  const res = await api.get<LegalDocumentResponse>('/api/disclaimer')
-  return res.data
-}
+  return (
+    <DocumentRenderer
+      apiEndpoint='/api/disclaimer'
+      title={t('免责声明')}
+      cacheKey='disclaimer'
+      emptyMessage={t('加载免责声明内容失败...')}
+    />
+  );
+};
+
+export default Disclaimer;
