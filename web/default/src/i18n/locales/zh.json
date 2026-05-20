@@ -1,5 +1,8 @@
 {
   "translation": {
+    "360": "360",
+    "1000": "1000",
+    "10000": "10000",
     "and the": "和",
     "The administrator has not configured a top-up link yet.": "管理员尚未配置充值链接。",
     "The top-up page could not be embedded (the target site may block iframes).": "充值页面无法嵌入显示(目标站点可能禁止 iframe)。",
@@ -11,9 +14,6 @@
     "Registration Notice": "注册页提示",
     "Shown as a banner on the registration page (e.g. service availability disclaimer).": "作为横幅显示在注册页面上(例如服务可用性免责声明)。",
     "Leave empty to hide the banner.": "留空以隐藏横幅。",
-    "360": "360",
-    "1000": "1000",
-    "10000": "10000",
     "_copy": "_复制",
     "，": "，",
     ", and": "，和",
@@ -1383,6 +1383,7 @@
     "Enable demo mode with limited functionality": "启用功能受限的演示模式",
     "Enable Discord OAuth": "启用 Discord OAuth",
     "Enable Disk Cache": "启用磁盘缓存",
+    "Enable Epay gateway": "启用 Epay 网关",
     "Enable drawing features": "启用绘制功能",
     "Enable filtering": "启用过滤",
     "Enable FunctionCall thoughtSignature Fill": "启用 FunctionCall 思维签名填充",
@@ -4418,6 +4419,7 @@
     "What would you like to know?": "您想了解什么？",
     "When a token uses the auto group, the system tries groups from top to bottom until it finds an available group.": "当令牌使用 auto 分组时，系统会按从上到下的顺序尝试，直到找到可用分组。",
     "When conditions match, the final price is multiplied by X. Multiple matches multiply together; values < 1 act as discounts.": "条件满足时，最终价格乘以 X；多条命中的倍率会相乘；小于 1 的值为折扣。",
+    "When disabled, Epay payment methods are hidden and Epay requests/webhooks are rejected.": "禁用后，Epay 支付方式将被隐藏，Epay 请求和回调会被拒绝。",
     "When enabled, if channels in the current group fail, it will try channels in the next group in order.": "开启后，当前分组渠道失败时会按顺序尝试下一个分组的渠道。",
     "When enabled, large request bodies are temporarily stored on disk instead of memory, significantly reducing memory usage. SSD recommended.": "启用磁盘缓存后，大请求体将临时存储到磁盘而非内存，可显著降低内存占用。建议在 SSD 环境下使用。",
     "When enabled, Midjourney callbacks are accepted (reveals server IP).": "启用时，接受 Midjourney 回调 (会泄露服务器 IP)。",
@@ -4487,6 +4489,19 @@
     "Zero retention": "零数据保留",
     "Zhipu": "智谱",
     "Zhipu V4": "智谱 V4",
-    "Zoom": "缩放"
+    "Zoom": "缩放",
+    "Redirecting to BEpusdt payment page...": "正在跳转到 BEpusdt 支付页面...",
+    "BEpusdt gateway URL is required": "请填写 BEpusdt 网关地址",
+    "BEpusdt auth token is required": "请填写 BEpusdt 认证令牌",
+    "BEpusdt Payment Gateway": "BEpusdt 支付网关",
+    "Configure BEpusdt USDT checkout integration for top-ups": "配置用于充值的 BEpusdt USDT 收银台集成",
+    "BEpusdt callback URL: <ServerAddress>/api/bepusdt/webhook. Keep the auth token secret and configure the same token in BEpusdt.": "BEpusdt 回调地址：<ServerAddress>/api/bepusdt/webhook。请妥善保管认证令牌，并在 BEpusdt 中配置相同令牌。",
+    "Enable BEpusdt": "启用 BEpusdt",
+    "Trade type": "交易类型",
+    "Fiat currency": "法币币种",
+    "Gateway URL": "网关地址",
+    "Auth token": "认证令牌",
+    "Unit price (fiat / USD)": "单价（法币 / USD）",
+    "Save BEpusdt settings": "保存 BEpusdt 设置"
   }
 }

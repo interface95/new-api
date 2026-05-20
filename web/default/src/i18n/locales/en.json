@@ -1,5 +1,8 @@
 {
   "translation": {
+    "360": "360",
+    "1000": "1000",
+    "10000": "10000",
     "and the": "and the",
     "The administrator has not configured a top-up link yet.": "The administrator has not configured a top-up link yet.",
     "The top-up page could not be embedded (the target site may block iframes).": "The top-up page could not be embedded (the target site may block iframes).",
@@ -11,9 +14,6 @@
     "Registration Notice": "Registration Notice",
     "Shown as a banner on the registration page (e.g. service availability disclaimer).": "Shown as a banner on the registration page (e.g. service availability disclaimer).",
     "Leave empty to hide the banner.": "Leave empty to hide the banner.",
-    "360": "360",
-    "1000": "1000",
-    "10000": "10000",
     "_copy": "_copy",
     "，": ", ",
     ", and": ", and",
@@ -1383,6 +1383,7 @@
     "Enable demo mode with limited functionality": "Enable demo mode with limited functionality",
     "Enable Discord OAuth": "Enable Discord OAuth",
     "Enable Disk Cache": "Enable Disk Cache",
+    "Enable Epay gateway": "Enable Epay gateway",
     "Enable drawing features": "Enable drawing features",
     "Enable filtering": "Enable filtering",
     "Enable FunctionCall thoughtSignature Fill": "Enable FunctionCall thoughtSignature Fill",
@@ -4418,6 +4419,7 @@
     "What would you like to know?": "What would you like to know?",
     "When a token uses the auto group, the system tries groups from top to bottom until it finds an available group.": "When a token uses the auto group, the system tries groups from top to bottom until it finds an available group.",
     "When conditions match, the final price is multiplied by X. Multiple matches multiply together; values < 1 act as discounts.": "When conditions match, the final price is multiplied by X. Multiple matches multiply together; values < 1 act as discounts.",
+    "When disabled, Epay payment methods are hidden and Epay requests/webhooks are rejected.": "When disabled, Epay payment methods are hidden and Epay requests/webhooks are rejected.",
     "When enabled, if channels in the current group fail, it will try channels in the next group in order.": "When enabled, if channels in the current group fail, it will try channels in the next group in order.",
     "When enabled, large request bodies are temporarily stored on disk instead of memory, significantly reducing memory usage. SSD recommended.": "When enabled, large request bodies are temporarily stored on disk instead of memory, significantly reducing memory usage. SSD recommended.",
     "When enabled, Midjourney callbacks are accepted (reveals server IP).": "When enabled, Midjourney callbacks are accepted (reveals server IP).",
@@ -4487,6 +4489,19 @@
     "Zero retention": "Zero retention",
     "Zhipu": "Zhipu",
     "Zhipu V4": "Zhipu V4",
-    "Zoom": "Zoom"
+    "Zoom": "Zoom",
+    "Redirecting to BEpusdt payment page...": "Redirecting to BEpusdt payment page...",
+    "BEpusdt gateway URL is required": "BEpusdt gateway URL is required",
+    "BEpusdt auth token is required": "BEpusdt auth token is required",
+    "BEpusdt Payment Gateway": "BEpusdt Payment Gateway",
+    "Configure BEpusdt USDT checkout integration for top-ups": "Configure BEpusdt USDT checkout integration for top-ups",
+    "BEpusdt callback URL: <ServerAddress>/api/bepusdt/webhook. Keep the auth token secret and configure the same token in BEpusdt.": "BEpusdt callback URL: <ServerAddress>/api/bepusdt/webhook. Keep the auth token secret and configure the same token in BEpusdt.",
+    "Enable BEpusdt": "Enable BEpusdt",
+    "Trade type": "Trade type",
+    "Fiat currency": "Fiat currency",
+    "Gateway URL": "Gateway URL",
+    "Auth token": "Auth token",
+    "Unit price (fiat / USD)": "Unit price (fiat / USD)",
+    "Save BEpusdt settings": "Save BEpusdt settings"
   }
 }

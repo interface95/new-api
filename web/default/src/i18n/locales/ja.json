@@ -1,5 +1,8 @@
 {
   "translation": {
+    "360": "360",
+    "1000": "1000",
+    "10000": "10000",
     "and the": "および",
     "The administrator has not configured a top-up link yet.": "管理者がチャージリンクをまだ設定していません。",
     "The top-up page could not be embedded (the target site may block iframes).": "チャージページを埋め込めませんでした(対象サイトが iframe をブロックしている可能性)。",
@@ -11,9 +14,6 @@
     "Registration Notice": "登録ページの通知",
     "Shown as a banner on the registration page (e.g. service availability disclaimer).": "登録ページにバナーとして表示されます(例: サービス利用可否の注意)。",
     "Leave empty to hide the banner.": "空のままにするとバナーは非表示になります。",
-    "360": "360",
-    "1000": "1000",
-    "10000": "10000",
     "_copy": "_copy",
     "，": ", ",
     ", and": "、および",
@@ -1383,6 +1383,7 @@
     "Enable demo mode with limited functionality": "機能が制限されたデモモードを有効にする",
     "Enable Discord OAuth": "Discord OAuthを有効にする",
     "Enable Disk Cache": "ディスクキャッシュを有効にする",
+    "Enable Epay gateway": "Epayゲートウェイを有効にする",
     "Enable drawing features": "描画機能を有効にする",
     "Enable filtering": "フィルタリングを有効にする",
     "Enable FunctionCall thoughtSignature Fill": "FunctionCall用のthoughtSignature自動付与を有効化",
@@ -4418,6 +4419,7 @@
     "What would you like to know?": "何を知りたいですか？",
     "When a token uses the auto group, the system tries groups from top to bottom until it finds an available group.": "トークンが auto グループを使用すると、システムは上から順に利用可能なグループを探します。",
     "When conditions match, the final price is multiplied by X. Multiple matches multiply together; values < 1 act as discounts.": "条件に一致したとき、最終価格に X を掛けます。複数一致は掛け合わさり、1 未満は割引として効きます。",
+    "When disabled, Epay payment methods are hidden and Epay requests/webhooks are rejected.": "無効にすると、Epayの支払い方法は非表示になり、EpayのリクエストとWebhookは拒否されます。",
     "When enabled, if channels in the current group fail, it will try channels in the next group in order.": "有効にすると、現在のグループのチャンネルが失敗した場合、次のグループのチャンネルを順番に試します。",
     "When enabled, large request bodies are temporarily stored on disk instead of memory, significantly reducing memory usage. SSD recommended.": "有効にすると、大きなリクエストボディはメモリではなくディスクに一時保存され、メモリ使用量が大幅に削減されます。SSD環境での使用を推奨します。",
     "When enabled, Midjourney callbacks are accepted (reveals server IP).": "有効にすると、Midjourney のコールバックを受け入れます (サーバーの IP を公開します)。",
@@ -4487,6 +4489,19 @@
     "Zero retention": "データ保持なし",
     "Zhipu": "Zhipu",
     "Zhipu V4": "Zhipu V 4",
-    "Zoom": "ズーム"
+    "Zoom": "ズーム",
+    "Redirecting to BEpusdt payment page...": "BEpusdt 支払いページへリダイレクトしています...",
+    "BEpusdt gateway URL is required": "BEpusdt ゲートウェイ URL は必須です",
+    "BEpusdt auth token is required": "BEpusdt 認証トークンは必須です",
+    "BEpusdt Payment Gateway": "BEpusdt 支払いゲートウェイ",
+    "Configure BEpusdt USDT checkout integration for top-ups": "チャージ用の BEpusdt USDT チェックアウト連携を設定します",
+    "BEpusdt callback URL: <ServerAddress>/api/bepusdt/webhook. Keep the auth token secret and configure the same token in BEpusdt.": "BEpusdt コールバック URL: <ServerAddress>/api/bepusdt/webhook。認証トークンは秘密に保管し、BEpusdt に同じトークンを設定してください。",
+    "Enable BEpusdt": "BEpusdt を有効化",
+    "Trade type": "取引タイプ",
+    "Fiat currency": "法定通貨",
+    "Gateway URL": "ゲートウェイ URL",
+    "Auth token": "認証トークン",
+    "Unit price (fiat / USD)": "単価（法定通貨 / USD）",
+    "Save BEpusdt settings": "BEpusdt 設定を保存"
   }
 }

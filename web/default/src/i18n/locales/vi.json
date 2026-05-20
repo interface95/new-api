@@ -1,5 +1,8 @@
 {
   "translation": {
+    "360": "360",
+    "1000": "1000",
+    "10000": "10000",
     "and the": "và",
     "The administrator has not configured a top-up link yet.": "Quản trị viên chưa cấu hình liên kết nạp tiền.",
     "The top-up page could not be embedded (the target site may block iframes).": "Không thể nhúng trang nạp tiền (trang đích có thể chặn iframe).",
@@ -11,9 +14,6 @@
     "Registration Notice": "Thông báo trang đăng ký",
     "Shown as a banner on the registration page (e.g. service availability disclaimer).": "Hiển thị dưới dạng biểu ngữ trên trang đăng ký (ví dụ: thông báo phạm vi dịch vụ).",
     "Leave empty to hide the banner.": "Để trống để ẩn biểu ngữ.",
-    "360": "360",
-    "1000": "1000",
-    "10000": "10000",
     "_copy": "_bản sao",
     "，": ", ",
     ", and": ", và",
@@ -1383,6 +1383,7 @@
     "Enable demo mode with limited functionality": "Bật chế độ demo với chức năng hạn chế",
     "Enable Discord OAuth": "Bật Discord OAuth",
     "Enable Disk Cache": "Bật bộ nhớ đệm đĩa",
+    "Enable Epay gateway": "Bật cổng thanh toán Epay",
     "Enable drawing features": "Bật tính năng vẽ",
     "Enable filtering": "Bật lọc",
     "Enable FunctionCall thoughtSignature Fill": "Bật tính năng điền FunctionCall thoughtSignature",
@@ -4418,6 +4419,7 @@
     "What would you like to know?": "Bạn muốn biết gì?",
     "When a token uses the auto group, the system tries groups from top to bottom until it finds an available group.": "Khi token dùng nhóm auto, hệ thống thử các nhóm từ trên xuống dưới cho đến khi tìm được nhóm khả dụng.",
     "When conditions match, the final price is multiplied by X. Multiple matches multiply together; values < 1 act as discounts.": "Khi thỏa điều kiện, giá cuối nhân với X. Nhiều điều kiện khớp nhân lại với nhau; giá trị < 1 hoạt động như giảm giá.",
+    "When disabled, Epay payment methods are hidden and Epay requests/webhooks are rejected.": "Khi tắt, các phương thức thanh toán Epay sẽ bị ẩn và các yêu cầu/webhook Epay sẽ bị từ chối.",
     "When enabled, if channels in the current group fail, it will try channels in the next group in order.": "Khi được bật, nếu các kênh trong nhóm hiện tại thất bại, hệ thống sẽ thử các kênh của nhóm tiếp theo theo thứ tự.",
     "When enabled, large request bodies are temporarily stored on disk instead of memory, significantly reducing memory usage. SSD recommended.": "Khi bật, nội dung yêu cầu lớn sẽ được lưu tạm trên đĩa thay vì bộ nhớ, giảm đáng kể việc sử dụng bộ nhớ. Khuyến nghị dùng SSD.",
     "When enabled, Midjourney callbacks are accepted (reveals server IP).": "Khi được bật, các callback của Midjourney được chấp nhận (lộ IP máy chủ).",
@@ -4487,6 +4489,19 @@
     "Zero retention": "Không lưu dữ liệu",
     "Zhipu": "Zhipu",
     "Zhipu V4": "Zhipu V4",
-    "Zoom": "Zoom"
+    "Zoom": "Zoom",
+    "Redirecting to BEpusdt payment page...": "Đang chuyển đến trang thanh toán BEpusdt...",
+    "BEpusdt gateway URL is required": "Bắt buộc nhập URL cổng BEpusdt",
+    "BEpusdt auth token is required": "Bắt buộc nhập mã xác thực BEpusdt",
+    "BEpusdt Payment Gateway": "Cổng thanh toán BEpusdt",
+    "Configure BEpusdt USDT checkout integration for top-ups": "Cấu hình tích hợp thanh toán USDT BEpusdt cho nạp tiền",
+    "BEpusdt callback URL: <ServerAddress>/api/bepusdt/webhook. Keep the auth token secret and configure the same token in BEpusdt.": "URL callback BEpusdt: <ServerAddress>/api/bepusdt/webhook. Hãy giữ bí mật mã xác thực và cấu hình cùng mã trong BEpusdt.",
+    "Enable BEpusdt": "Bật BEpusdt",
+    "Trade type": "Loại giao dịch",
+    "Fiat currency": "Tiền pháp định",
+    "Gateway URL": "URL cổng",
+    "Auth token": "Mã xác thực",
+    "Unit price (fiat / USD)": "Đơn giá (fiat / USD)",
+    "Save BEpusdt settings": "Lưu cài đặt BEpusdt"
   }
 }

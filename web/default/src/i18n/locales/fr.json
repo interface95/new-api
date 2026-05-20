@@ -1,5 +1,8 @@
 {
   "translation": {
+    "360": "360",
+    "1000": "1000",
+    "10000": "10000",
     "and the": "et",
     "The administrator has not configured a top-up link yet.": "L'administrateur n'a pas encore configuré de lien de recharge.",
     "The top-up page could not be embedded (the target site may block iframes).": "Impossible d'intégrer la page de recharge (le site cible bloque peut-être les iframes).",
@@ -11,9 +14,6 @@
     "Registration Notice": "Avis sur la page d'inscription",
     "Shown as a banner on the registration page (e.g. service availability disclaimer).": "Affiché en bannière sur la page d'inscription (par exemple un avis de disponibilité du service).",
     "Leave empty to hide the banner.": "Laissez vide pour masquer la bannière.",
-    "360": "360",
-    "1000": "1000",
-    "10000": "10000",
     "_copy": "_copie",
     "，": ", ",
     ", and": ", et",
@@ -1383,6 +1383,7 @@
     "Enable demo mode with limited functionality": "Activer le mode démo avec des fonctionnalités limitées",
     "Enable Discord OAuth": "Activer OAuth Discord",
     "Enable Disk Cache": "Activer le cache disque",
+    "Enable Epay gateway": "Activer la passerelle Epay",
     "Enable drawing features": "Activer les fonctionnalités de dessin",
     "Enable filtering": "Activer le filtrage",
     "Enable FunctionCall thoughtSignature Fill": "Activer le remplissage de thoughtSignature pour FunctionCall",
@@ -4418,6 +4419,7 @@
     "What would you like to know?": "Que voulez-vous savoir ?",
     "When a token uses the auto group, the system tries groups from top to bottom until it finds an available group.": "Quand un jeton utilise le groupe auto, le système essaie les groupes de haut en bas jusqu’à trouver un groupe disponible.",
     "When conditions match, the final price is multiplied by X. Multiple matches multiply together; values < 1 act as discounts.": "Si les conditions sont remplies, le prix final est multiplié par X. Plusieurs correspondances se multiplient ; les valeurs < 1 agissent comme des remises.",
+    "When disabled, Epay payment methods are hidden and Epay requests/webhooks are rejected.": "Lorsque cette option est désactivée, les modes de paiement Epay sont masqués et les requêtes/webhooks Epay sont rejetés.",
     "When enabled, if channels in the current group fail, it will try channels in the next group in order.": "Lorsqu'elle est activée, si les canaux du groupe actuel échouent, le système essaiera les canaux du groupe suivant dans l'ordre.",
     "When enabled, large request bodies are temporarily stored on disk instead of memory, significantly reducing memory usage. SSD recommended.": "Lorsqu'activé, les corps de requête volumineux sont temporairement stockés sur disque, réduisant considérablement l'utilisation mémoire. SSD recommandé.",
     "When enabled, Midjourney callbacks are accepted (reveals server IP).": "Lorsque activé, les callbacks Midjourney sont acceptés (révèle l'IP du serveur).",
@@ -4487,6 +4489,19 @@
     "Zero retention": "Aucune rétention",
     "Zhipu": "Zhipu",
     "Zhipu V4": "Zhipu V4",
-    "Zoom": "Zoom"
+    "Zoom": "Zoom",
+    "Redirecting to BEpusdt payment page...": "Redirection vers la page de paiement BEpusdt...",
+    "BEpusdt gateway URL is required": "L'URL de la passerelle BEpusdt est requise",
+    "BEpusdt auth token is required": "Le jeton d'authentification BEpusdt est requis",
+    "BEpusdt Payment Gateway": "Passerelle de paiement BEpusdt",
+    "Configure BEpusdt USDT checkout integration for top-ups": "Configurer l'intégration de paiement USDT BEpusdt pour les recharges",
+    "BEpusdt callback URL: <ServerAddress>/api/bepusdt/webhook. Keep the auth token secret and configure the same token in BEpusdt.": "URL de rappel BEpusdt : <ServerAddress>/api/bepusdt/webhook. Gardez le jeton d'authentification secret et configurez le même jeton dans BEpusdt.",
+    "Enable BEpusdt": "Activer BEpusdt",
+    "Trade type": "Type de transaction",
+    "Fiat currency": "Devise fiduciaire",
+    "Gateway URL": "URL de la passerelle",
+    "Auth token": "Jeton d'authentification",
+    "Unit price (fiat / USD)": "Prix unitaire (fiat / USD)",
+    "Save BEpusdt settings": "Enregistrer les paramètres BEpusdt"
   }
 }

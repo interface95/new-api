@@ -1,5 +1,8 @@
 {
   "translation": {
+    "360": "360",
+    "1000": "1000",
+    "10000": "10000",
     "and the": "и",
     "The administrator has not configured a top-up link yet.": "Администратор ещё не настроил ссылку пополнения.",
     "The top-up page could not be embedded (the target site may block iframes).": "Не удалось встроить страницу пополнения (сайт может блокировать iframe).",
@@ -11,9 +14,6 @@
     "Registration Notice": "Уведомление на странице регистрации",
     "Shown as a banner on the registration page (e.g. service availability disclaimer).": "Отображается в виде баннера на странице регистрации (например, предупреждение о доступности сервиса).",
     "Leave empty to hide the banner.": "Оставьте пустым, чтобы скрыть баннер.",
-    "360": "360",
-    "1000": "1000",
-    "10000": "10000",
     "_copy": "_копировать",
     "，": ", ",
     ", and": ", и",
@@ -1383,6 +1383,7 @@
     "Enable demo mode with limited functionality": "Включить демонстрационный режим с ограниченной функциональностью",
     "Enable Discord OAuth": "Включить Discord OAuth",
     "Enable Disk Cache": "Включить дисковый кэш",
+    "Enable Epay gateway": "Включить шлюз Epay",
     "Enable drawing features": "Включить функции рисования",
     "Enable filtering": "Включить фильтрацию",
     "Enable FunctionCall thoughtSignature Fill": "Включить автозаполнение thoughtSignature для FunctionCall",
@@ -4418,6 +4419,7 @@
     "What would you like to know?": "Что вы хотели бы узнать?",
     "When a token uses the auto group, the system tries groups from top to bottom until it finds an available group.": "Когда токен использует группу auto, система перебирает группы сверху вниз, пока не найдёт доступную.",
     "When conditions match, the final price is multiplied by X. Multiple matches multiply together; values < 1 act as discounts.": "При совпадении условий итоговая цена умножается на X. Несколько совпадений умножаются вместе; значения < 1 действуют как скидки.",
+    "When disabled, Epay payment methods are hidden and Epay requests/webhooks are rejected.": "Если отключено, способы оплаты Epay скрываются, а запросы и вебхуки Epay отклоняются.",
     "When enabled, if channels in the current group fail, it will try channels in the next group in order.": "Если включено, при сбое каналов в текущей группе система попробует каналы следующей группы по порядку.",
     "When enabled, large request bodies are temporarily stored on disk instead of memory, significantly reducing memory usage. SSD recommended.": "При включении большие тела запросов временно сохраняются на диске, что значительно снижает использование памяти. Рекомендуется SSD.",
     "When enabled, Midjourney callbacks are accepted (reveals server IP).": "При включении принимаются обратные вызовы Midjourney (раскрывает IP сервера).",
@@ -4487,6 +4489,19 @@
     "Zero retention": "Без хранения данных",
     "Zhipu": "Zhipu",
     "Zhipu V4": "Zhipu V4",
-    "Zoom": "Zoom"
+    "Zoom": "Zoom",
+    "Redirecting to BEpusdt payment page...": "Переход на страницу оплаты BEpusdt...",
+    "BEpusdt gateway URL is required": "Требуется URL шлюза BEpusdt",
+    "BEpusdt auth token is required": "Требуется токен авторизации BEpusdt",
+    "BEpusdt Payment Gateway": "Платежный шлюз BEpusdt",
+    "Configure BEpusdt USDT checkout integration for top-ups": "Настройте интеграцию оплаты BEpusdt USDT для пополнений",
+    "BEpusdt callback URL: <ServerAddress>/api/bepusdt/webhook. Keep the auth token secret and configure the same token in BEpusdt.": "URL обратного вызова BEpusdt: <ServerAddress>/api/bepusdt/webhook. Храните токен авторизации в секрете и настройте тот же токен в BEpusdt.",
+    "Enable BEpusdt": "Включить BEpusdt",
+    "Trade type": "Тип сделки",
+    "Fiat currency": "Фиатная валюта",
+    "Gateway URL": "URL шлюза",
+    "Auth token": "Токен авторизации",
+    "Unit price (fiat / USD)": "Цена за единицу (фиат / USD)",
+    "Save BEpusdt settings": "Сохранить настройки BEpusdt"
   }
 }
