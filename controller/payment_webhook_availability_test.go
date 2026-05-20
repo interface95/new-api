@@ -159,17 +159,20 @@ func TestWaffoPancakeWebhookEnabledRequiresTopUpAndWebhookConfig(t *testing.T) {
 
 func TestEpayWebhookEnabledRequiresTopUpAndWebhookConfig(t *testing.T) {
 	confirmPaymentComplianceForTest(t)
+	originalEnabled := operation_setting.EpayEnabled
 	originalPayAddress := operation_setting.PayAddress
 	originalEpayID := operation_setting.EpayId
 	originalEpayKey := operation_setting.EpayKey
 	originalPayMethods := operation_setting.PayMethods
 	t.Cleanup(func() {
+		operation_setting.EpayEnabled = originalEnabled
 		operation_setting.PayAddress = originalPayAddress
 		operation_setting.EpayId = originalEpayID
 		operation_setting.EpayKey = originalEpayKey
 		operation_setting.PayMethods = originalPayMethods
 	})
 
+	operation_setting.EpayEnabled = true
 	operation_setting.PayAddress = "https://pay.example.com"
 	operation_setting.EpayId = "epay_id"
 	operation_setting.EpayKey = ""
@@ -179,6 +182,10 @@ func TestEpayWebhookEnabledRequiresTopUpAndWebhookConfig(t *testing.T) {
 	operation_setting.EpayKey = "epay_key"
 	require.True(t, isEpayWebhookEnabled())
 
+	operation_setting.EpayEnabled = false
+	require.False(t, isEpayWebhookEnabled())
+
+	operation_setting.EpayEnabled = true
 	operation_setting.PayMethods = nil
 	require.False(t, isEpayWebhookEnabled())
 }

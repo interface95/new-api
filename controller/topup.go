@@ -25,9 +25,10 @@ func GetTopUpInfo(c *gin.Context) {
 	complianceConfirmed := operation_setting.IsPaymentComplianceConfirmed()
 
 	// 获取支付方式
-	payMethods := operation_setting.PayMethods
-	if !complianceConfirmed {
-		payMethods = []map[string]string{}
+	enableEpay := isEpayTopUpEnabled()
+	payMethods := []map[string]string{}
+	if enableEpay {
+		payMethods = operation_setting.PayMethods
 	}
 
 	// 如果启用了 Stripe 支付，添加到支付方法列表
@@ -94,12 +95,34 @@ func GetTopUpInfo(c *gin.Context) {
 		}
 	}
 
+	enableBepusdt := isBepusdtTopUpEnabled()
+	if enableBepusdt {
+		hasBepusdt := false
+		for _, method := range payMethods {
+			if method["type"] == model.PaymentMethodBepusdt {
+				hasBepusdt = true
+				break
+			}
+		}
+
+		if !hasBepusdt {
+			bepusdtMinTopup := getBepusdtMinTopup()
+			payMethods = append(payMethods, map[string]string{
+				"name":      "BEpusdt",
+				"type":      model.PaymentMethodBepusdt,
+				"color":     "rgba(var(--semi-green-5), 1)",
+				"min_topup": strconv.FormatInt(bepusdtMinTopup, 10),
+			})
+		}
+	}
+
 	data := gin.H{
-		"enable_online_topup":              isEpayTopUpEnabled(),
+		"enable_online_topup":              enableEpay,
 		"enable_stripe_topup":              isStripeTopUpEnabled(),
 		"enable_creem_topup":               isCreemTopUpEnabled(),
 		"enable_waffo_topup":               enableWaffo,
 		"enable_waffo_pancake_topup":       enableWaffoPancake,
+		"enable_bepusdt_topup":             enableBepusdt,
 		"enable_redemption":                complianceConfirmed,
 		"payment_compliance_confirmed":     complianceConfirmed,
 		"payment_compliance_terms_version": operation_setting.CurrentComplianceTermsVersion,
@@ -115,6 +138,7 @@ func GetTopUpInfo(c *gin.Context) {
 		"stripe_min_topup":        setting.StripeMinTopUp,
 		"waffo_min_topup":         setting.WaffoMinTopUp,
 		"waffo_pancake_min_topup": setting.WaffoPancakeMinTopUp,
+		"bepusdt_min_topup":       getBepusdtMinTopup(),
 		"amount_options":          operation_setting.GetPaymentSetting().AmountOptions,
 		"discount":                operation_setting.GetPaymentSetting().AmountDiscount,
 		"topup_link":              common.TopUpLink,
@@ -132,7 +156,7 @@ type AmountRequest struct {
 }
 
 func GetEpayClient() *epay.Client {
-	if operation_setting.PayAddress == "" || operation_setting.EpayId == "" || operation_setting.EpayKey == "" {
+	if !operation_setting.EpayEnabled || operation_setting.PayAddress == "" || operation_setting.EpayId == "" || operation_setting.EpayKey == "" {
 		return nil
 	}
 	withUrl, err := epay.NewClient(&epay.Config{
@@ -190,6 +214,10 @@ func RequestEpay(c *gin.Context) {
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{"message": "error", "data": "参数错误"})
+		return
+	}
+	if !isEpayTopUpEnabled() {
+		c.JSON(http.StatusOK, gin.H{"message": "error", "data": "当前管理员未启用支付"})
 		return
 	}
 	if req.Amount < getMinTopup() {
@@ -415,6 +443,10 @@ func RequestAmount(c *gin.Context) {
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{"message": "error", "data": "参数错误"})
+		return
+	}
+	if !isEpayTopUpEnabled() {
+		c.JSON(http.StatusOK, gin.H{"message": "error", "data": "当前管理员未启用支付"})
 		return
 	}
 
