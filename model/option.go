@@ -75,6 +75,7 @@ func InitOptionMap() {
 	common.OptionMap["WorkerAllowHttpImageRequestEnabled"] = strconv.FormatBool(system_setting.WorkerAllowHttpImageRequestEnabled)
 	common.OptionMap["PayAddress"] = ""
 	common.OptionMap["CustomCallbackAddress"] = ""
+	common.OptionMap["EpayEnabled"] = strconv.FormatBool(operation_setting.EpayEnabled)
 	common.OptionMap["EpayId"] = ""
 	common.OptionMap["EpayKey"] = ""
 	common.OptionMap["Price"] = strconv.FormatFloat(operation_setting.Price, 'f', -1, 64)
@@ -118,6 +119,14 @@ func InitOptionMap() {
 	common.OptionMap["WaffoPancakeCurrency"] = setting.WaffoPancakeCurrency
 	common.OptionMap["WaffoPancakeUnitPrice"] = strconv.FormatFloat(setting.WaffoPancakeUnitPrice, 'f', -1, 64)
 	common.OptionMap["WaffoPancakeMinTopUp"] = strconv.Itoa(setting.WaffoPancakeMinTopUp)
+	common.OptionMap["BepusdtEnabled"] = strconv.FormatBool(setting.BepusdtEnabled)
+	common.OptionMap["BepusdtGatewayURL"] = setting.BepusdtGatewayURL
+	common.OptionMap["BepusdtAuthToken"] = setting.BepusdtAuthToken
+	common.OptionMap["BepusdtTradeType"] = setting.BepusdtTradeType
+	common.OptionMap["BepusdtFiat"] = setting.BepusdtFiat
+	common.OptionMap["BepusdtReturnURL"] = setting.BepusdtReturnURL
+	common.OptionMap["BepusdtUnitPrice"] = strconv.FormatFloat(setting.BepusdtUnitPrice, 'f', -1, 64)
+	common.OptionMap["BepusdtMinTopUp"] = strconv.Itoa(setting.BepusdtMinTopUp)
 	common.OptionMap["TopupGroupRatio"] = common.TopupGroupRatio2JSONString()
 	common.OptionMap["Chats"] = setting.Chats2JsonString()
 	common.OptionMap["AutoGroups"] = setting.AutoGroups2JsonString()
@@ -360,6 +369,8 @@ func updateOptionMap(key string, value string) (err error) {
 		err = setting.UpdateAutoGroupsByJsonString(value)
 	case "CustomCallbackAddress":
 		operation_setting.CustomCallbackAddress = value
+	case "EpayEnabled":
+		operation_setting.EpayEnabled = value == "true"
 	case "EpayId":
 		operation_setting.EpayId = value
 	case "EpayKey":
@@ -444,6 +455,22 @@ func updateOptionMap(key string, value string) (err error) {
 		setting.WaffoPancakeUnitPrice, _ = strconv.ParseFloat(value, 64)
 	case "WaffoPancakeMinTopUp":
 		setting.WaffoPancakeMinTopUp, _ = strconv.Atoi(value)
+	case "BepusdtEnabled":
+		setting.BepusdtEnabled = value == "true"
+	case "BepusdtGatewayURL":
+		setting.BepusdtGatewayURL = value
+	case "BepusdtAuthToken":
+		setting.BepusdtAuthToken = value
+	case "BepusdtTradeType":
+		setting.BepusdtTradeType = value
+	case "BepusdtFiat":
+		setting.BepusdtFiat = value
+	case "BepusdtReturnURL":
+		setting.BepusdtReturnURL = value
+	case "BepusdtUnitPrice":
+		setting.BepusdtUnitPrice, _ = strconv.ParseFloat(value, 64)
+	case "BepusdtMinTopUp":
+		setting.BepusdtMinTopUp, _ = strconv.Atoi(value)
 	case "TopupGroupRatio":
 		err = common.UpdateTopupGroupRatioByJSONString(value)
 	case "GitHubClientId":

@@ -11,6 +11,7 @@ import (
 
 var PayAddress = ""
 var CustomCallbackAddress = ""
+var EpayEnabled = false
 var EpayId = ""
 var EpayKey = ""
 var Price = 7.3
