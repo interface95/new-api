@@ -25,6 +25,10 @@ func SubscriptionRequestEpay(c *gin.Context) {
 	if !requirePaymentCompliance(c) {
 		return
 	}
+	if !isEpayTopUpEnabled() {
+		common.ApiErrorMsg(c, "当前管理员未启用支付")
+		return
+	}
 
 	var req SubscriptionEpayPayRequest
 	if err := c.ShouldBindJSON(&req); err != nil || req.PlanId <= 0 {
@@ -116,6 +120,11 @@ func SubscriptionRequestEpay(c *gin.Context) {
 }
 
 func SubscriptionEpayNotify(c *gin.Context) {
+	if !isEpayWebhookEnabled() {
+		_, _ = c.Writer.Write([]byte("fail"))
+		return
+	}
+
 	var params map[string]string
 
 	if c.Request.Method == "POST" {
@@ -171,6 +180,11 @@ func SubscriptionEpayNotify(c *gin.Context) {
 // SubscriptionEpayReturn handles browser return after payment.
 // It verifies the payload and completes the order, then redirects to console.
 func SubscriptionEpayReturn(c *gin.Context) {
+	if !isEpayWebhookEnabled() {
+		c.Redirect(http.StatusFound, paymentReturnPath("/console/topup?pay=fail"))
+		return
+	}
+
 	var params map[string]string
 
 	if c.Request.Method == "POST" {
