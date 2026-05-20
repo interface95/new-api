@@ -139,6 +139,7 @@ const BILLING_SECTIONS = [
     build: (settings: BillingSettings) => (
       <PaymentSettingsSection
         defaultValues={{
+          EpayEnabled: settings.EpayEnabled ?? false,
           PayAddress: settings.PayAddress,
           EpayId: settings.EpayId,
           EpayKey: settings.EpayKey,
@@ -190,6 +191,16 @@ const BILLING_SECTIONS = [
           WaffoPancakeCurrency: settings.WaffoPancakeCurrency ?? 'USD',
           WaffoPancakeUnitPrice: settings.WaffoPancakeUnitPrice ?? 1,
           WaffoPancakeMinTopUp: settings.WaffoPancakeMinTopUp ?? 1,
+        }}
+        bepusdtDefaultValues={{
+          BepusdtEnabled: settings.BepusdtEnabled ?? false,
+          BepusdtGatewayURL: settings.BepusdtGatewayURL ?? '',
+          BepusdtAuthToken: settings.BepusdtAuthToken ?? '',
+          BepusdtTradeType: settings.BepusdtTradeType ?? 'usdt.trc20',
+          BepusdtFiat: settings.BepusdtFiat ?? 'CNY',
+          BepusdtReturnURL: settings.BepusdtReturnURL ?? '',
+          BepusdtUnitPrice: settings.BepusdtUnitPrice ?? 1,
+          BepusdtMinTopUp: settings.BepusdtMinTopUp ?? 1,
         }}
         complianceDefaults={{
           confirmed: settings['payment_setting.compliance_confirmed'] ?? false,

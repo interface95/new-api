@@ -219,6 +219,7 @@ export type BillingSettings = {
   AutoGroups: string
   DefaultUseAutoGroup: boolean
   'group_ratio_setting.group_special_usable_group': string
+  EpayEnabled: boolean
   PayAddress: string
   EpayId: string
   EpayKey: string
@@ -270,6 +271,14 @@ export type BillingSettings = {
   WaffoPancakeCurrency: string
   WaffoPancakeUnitPrice: number
   WaffoPancakeMinTopUp: number
+  BepusdtEnabled: boolean
+  BepusdtGatewayURL: string
+  BepusdtAuthToken: string
+  BepusdtTradeType: string
+  BepusdtFiat: string
+  BepusdtReturnURL: string
+  BepusdtUnitPrice: number
+  BepusdtMinTopUp: number
   'checkin_setting.enabled': boolean
   'checkin_setting.min_quota': number
   'checkin_setting.max_quota': number

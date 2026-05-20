@@ -17,13 +17,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { SettingsPage } from '../components/settings-page'
-import type { BillingSettings } from '../types'
+import type { BillingSettings as BillingSettingsValues } from '../types'
 import {
   BILLING_DEFAULT_SECTION,
   getBillingSectionContent,
 } from './section-registry.tsx'
 
-const defaultBillingSettings: BillingSettings = {
+const defaultBillingSettings: BillingSettingsValues = {
   QuotaForNewUser: 0,
   PreConsumedQuota: 0,
   QuotaForInviter: 0,
@@ -57,6 +57,7 @@ const defaultBillingSettings: BillingSettings = {
   AutoGroups: '',
   DefaultUseAutoGroup: false,
   'group_ratio_setting.group_special_usable_group': '{}',
+  EpayEnabled: false,
   PayAddress: '',
   EpayId: '',
   EpayKey: '',
@@ -108,6 +109,14 @@ const defaultBillingSettings: BillingSettings = {
   WaffoPancakeCurrency: 'USD',
   WaffoPancakeUnitPrice: 1,
   WaffoPancakeMinTopUp: 1,
+  BepusdtEnabled: false,
+  BepusdtGatewayURL: '',
+  BepusdtAuthToken: '',
+  BepusdtTradeType: 'usdt.trc20',
+  BepusdtFiat: 'CNY',
+  BepusdtReturnURL: '',
+  BepusdtUnitPrice: 1,
+  BepusdtMinTopUp: 1,
   'checkin_setting.enabled': false,
   'checkin_setting.min_quota': 1000,
   'checkin_setting.max_quota': 10000,

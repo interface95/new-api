@@ -51,6 +51,10 @@ import { SettingsSection } from '../components/settings-section'
 import { useUpdateOption } from '../hooks/use-update-option'
 import { AmountDiscountVisualEditor } from './amount-discount-visual-editor'
 import { AmountOptionsVisualEditor } from './amount-options-visual-editor'
+import {
+  BepusdtSettingsSection,
+  type BepusdtSettingsValues,
+} from './bepusdt-settings-section'
 import { CreemProductsVisualEditor } from './creem-products-visual-editor'
 import { PaymentMethodsVisualEditor } from './payment-methods-visual-editor'
 import {
@@ -69,6 +73,7 @@ import {
 } from './waffo-settings-section'
 
 const paymentSchema = z.object({
+  EpayEnabled: z.boolean(),
   PayAddress: z.string().refine((value) => {
     const trimmed = value.trim()
     if (!trimmed) return true
@@ -149,6 +154,7 @@ type PaymentSettingsSectionProps = {
   defaultValues: PaymentFormValues
   waffoDefaultValues: WaffoSettingsValues
   waffoPancakeDefaultValues: WaffoPancakeSettingsValues
+  bepusdtDefaultValues: BepusdtSettingsValues
   complianceDefaults: PaymentComplianceDefaults
 }
 
@@ -156,6 +162,7 @@ export function PaymentSettingsSection({
   defaultValues,
   waffoDefaultValues,
   waffoPancakeDefaultValues,
+  bepusdtDefaultValues,
   complianceDefaults,
 }: PaymentSettingsSectionProps) {
   const { t } = useTranslation()
@@ -341,6 +348,7 @@ export function PaymentSettingsSection({
   const saveEpaySettings = async () => {
     const values = form.getValues()
     const sanitized = {
+      EpayEnabled: values.EpayEnabled as boolean,
       PayAddress: removeTrailingSlash(values.PayAddress),
       EpayId: values.EpayId.trim(),
       EpayKey: values.EpayKey.trim(),
@@ -348,6 +356,7 @@ export function PaymentSettingsSection({
     }
 
     const initial = {
+      EpayEnabled: initialRef.current.EpayEnabled,
       PayAddress: removeTrailingSlash(initialRef.current.PayAddress),
       EpayId: initialRef.current.EpayId.trim(),
       EpayKey: initialRef.current.EpayKey.trim(),
@@ -356,7 +365,11 @@ export function PaymentSettingsSection({
       ),
     }
 
-    const updates: Array<{ key: string; value: string }> = []
+    const updates: Array<{ key: string; value: string | boolean }> = []
+
+    if (sanitized.EpayEnabled !== initial.EpayEnabled) {
+      updates.push({ key: 'EpayEnabled', value: sanitized.EpayEnabled })
+    }
 
     if (sanitized.PayAddress !== initial.PayAddress) {
       updates.push({ key: 'PayAddress', value: sanitized.PayAddress })
@@ -515,6 +528,7 @@ export function PaymentSettingsSection({
 
   const onSubmit = async (values: PaymentFormValues) => {
     const sanitized = {
+      EpayEnabled: values.EpayEnabled,
       PayAddress: removeTrailingSlash(values.PayAddress),
       EpayId: values.EpayId.trim(),
       EpayKey: values.EpayKey.trim(),
@@ -533,6 +547,7 @@ export function PaymentSettingsSection({
     }
 
     const initial = {
+      EpayEnabled: initialRef.current.EpayEnabled,
       PayAddress: removeTrailingSlash(initialRef.current.PayAddress),
       EpayId: initialRef.current.EpayId.trim(),
       EpayKey: initialRef.current.EpayKey.trim(),
@@ -554,6 +569,10 @@ export function PaymentSettingsSection({
     }
 
     const updates: Array<{ key: string; value: string | number | boolean }> = []
+
+    if (sanitized.EpayEnabled !== initial.EpayEnabled) {
+      updates.push({ key: 'EpayEnabled', value: sanitized.EpayEnabled })
+    }
 
     if (sanitized.PayAddress !== initial.PayAddress) {
       updates.push({ key: 'PayAddress', value: sanitized.PayAddress })
@@ -985,6 +1004,29 @@ export function PaymentSettingsSection({
                 {t('Configuration for Epay payment integration')}
               </p>
             </div>
+
+            <FormField
+              control={form.control}
+              name='EpayEnabled'
+              render={({ field }) => (
+                <FormItem className='flex flex-row items-center justify-between rounded-lg border p-4'>
+                  <div className='space-y-0.5'>
+                    <FormLabel>{t('Enable Epay gateway')}</FormLabel>
+                    <FormDescription>
+                      {t(
+                        'When disabled, Epay payment methods are hidden and Epay requests/webhooks are rejected.'
+                      )}
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
 
             <div className='grid gap-6 md:grid-cols-2'>
               <FormField
@@ -1473,6 +1515,10 @@ export function PaymentSettingsSection({
       <Separator />
 
       <WaffoPancakeSettingsSection defaultValues={waffoPancakeDefaultValues} />
+
+      <Separator />
+
+      <BepusdtSettingsSection defaultValues={bepusdtDefaultValues} />
       {/* eslint-enable react-hooks/refs */}
     </SettingsSection>
   )
