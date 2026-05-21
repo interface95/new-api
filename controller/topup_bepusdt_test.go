@@ -114,7 +114,7 @@ func TestGetTopUpInfoUsesBepusdtTokenDisplayMinimum(t *testing.T) {
 	expectedMinTopup := fmt.Sprintf("%.0f", common.QuotaPerUnit*2)
 	require.Equal(t, int64(common.QuotaPerUnit*2), response.Data.BepusdtMinTopUp)
 	require.Contains(t, response.Data.PayMethods, map[string]string{
-		"name":      "BEpusdt",
+		"name":      "USDT(TRC20)",
 		"type":      model.PaymentMethodBepusdt,
 		"color":     "rgba(var(--semi-green-5), 1)",
 		"min_topup": expectedMinTopup,

@@ -108,7 +108,7 @@ func GetTopUpInfo(c *gin.Context) {
 		if !hasBepusdt {
 			bepusdtMinTopup := getBepusdtMinTopup()
 			payMethods = append(payMethods, map[string]string{
-				"name":      "BEpusdt",
+				"name":      "USDT(TRC20)",
 				"type":      model.PaymentMethodBepusdt,
 				"color":     "rgba(var(--semi-green-5), 1)",
 				"min_topup": strconv.FormatInt(bepusdtMinTopup, 10),
