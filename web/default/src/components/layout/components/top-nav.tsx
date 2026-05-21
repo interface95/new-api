@@ -18,7 +18,7 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { useMemo } from 'react'
 import { Link } from '@tanstack/react-router'
-import { CreditCard, Menu } from 'lucide-react'
+import { Menu } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
@@ -31,19 +31,6 @@ import { type TopNavLink } from '../types'
 
 type TopNavProps = React.HTMLAttributes<HTMLElement> & {
   links: TopNavLink[]
-}
-
-function isTopUpLink(href: string): boolean {
-  return href === '/topup' || href === '/console/topup'
-}
-
-function TopUpNavLabel(props: { title: string }) {
-  return (
-    <span className='relative z-10 inline-flex items-center gap-1.5'>
-      <CreditCard className='size-3.5' aria-hidden='true' />
-      <span>{props.title}</span>
-    </span>
-  )
 }
 
 /**
@@ -114,13 +101,9 @@ export function TopNav({ className, links, ...props }: TopNavProps) {
         {...props}
       >
         {normalizedLinks.map(({ title, href, isActive, disabled, external }) => {
-          const isTopUp = isTopUpLink(href)
           const linkClassName = cn(
-            'text-sm font-medium transition-colors',
-            isTopUp
-              ? 'inline-flex transform-gpu items-center justify-center rounded-full bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-400 px-3.5 py-1.5 text-white shadow-lg shadow-cyan-500/25 ring-1 ring-white/15 motion-safe:animate-pulse hover:scale-105 hover:text-white hover:shadow-cyan-400/40 focus-visible:ring-2 focus-visible:ring-cyan-300'
-              : 'hover:text-primary',
-            !isTopUp && !isActive && 'text-muted-foreground',
+            'text-sm font-medium transition-colors hover:text-primary',
+            !isActive && 'text-muted-foreground',
             disabled && 'pointer-events-none opacity-50'
           )
           return external ? (
@@ -132,7 +115,7 @@ export function TopNav({ className, links, ...props }: TopNavProps) {
               aria-disabled={disabled}
               className={linkClassName}
             >
-              {isTopUp ? <TopUpNavLabel title={title} /> : title}
+              {title}
             </a>
           ) : (
             <Link
@@ -141,7 +124,7 @@ export function TopNav({ className, links, ...props }: TopNavProps) {
               disabled={disabled}
               className={linkClassName}
             >
-              {isTopUp ? <TopUpNavLabel title={title} /> : title}
+              {title}
             </Link>
           )
         })}

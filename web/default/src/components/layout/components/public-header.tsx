@@ -18,7 +18,6 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate, useRouterState } from '@tanstack/react-router'
-import { CreditCard } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/stores/auth-store'
 import { cn } from '@/lib/utils'
@@ -49,19 +48,6 @@ const AUTH_PROMPT_SECONDS = 5
 type AuthPromptTarget = {
   title: string
   href: string
-}
-
-function isTopUpLink(href: string): boolean {
-  return href === '/topup' || href === '/console/topup'
-}
-
-function TopUpNavLabel(props: { title: string }) {
-  return (
-    <span className='relative z-10 inline-flex items-center gap-1.5'>
-      <CreditCard className='size-3.5' aria-hidden='true' />
-      <span>{props.title}</span>
-    </span>
-  )
 }
 
 export interface PublicHeaderProps {
@@ -238,21 +224,14 @@ export function PublicHeader(props: PublicHeaderProps) {
             <div className='hidden items-center gap-0.5 sm:flex'>
               {links.map((link) => {
                 const isActive = pathname === link.href
-                const isTopUp = isTopUpLink(link.href)
                 const desktopLinkClassName = cn(
                   'rounded-lg px-3 py-1.5 text-[13px] font-medium transition-colors duration-200',
-                  isTopUp
-                    ? 'transform-gpu rounded-full bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-400 px-3.5 text-white shadow-lg shadow-cyan-500/25 ring-1 ring-white/15 motion-safe:animate-pulse hover:scale-105 hover:text-white hover:shadow-cyan-400/40 focus-visible:ring-2 focus-visible:ring-cyan-300'
-                    : isActive
-                      ? 'text-foreground'
-                      : 'text-muted-foreground hover:text-foreground',
+                  isActive
+                    ? 'text-foreground'
+                    : 'text-muted-foreground hover:text-foreground',
                   link.disabled && 'pointer-events-none opacity-50'
                 )
-                const desktopContent = isTopUp ? (
-                  <TopUpNavLabel title={t(link.title)} />
-                ) : (
-                  t(link.title)
-                )
+                const desktopContent = t(link.title)
                 if (link.external) {
                   return (
                     <a
