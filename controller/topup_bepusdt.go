@@ -117,7 +117,9 @@ func RequestBepusdtPay(c *gin.Context) {
 	if err != nil {
 		logger.LogError(c.Request.Context(), fmt.Sprintf("BEpusdt 创建支付交易失败 user_id=%d trade_no=%s error=%q", id, tradeNo, err.Error()))
 		topUp.Status = common.TopUpStatusFailed
-		_ = topUp.Update()
+		if updateErr := topUp.Update(); updateErr != nil {
+			logger.LogError(c.Request.Context(), fmt.Sprintf("BEpusdt 标记订单失败 user_id=%d trade_no=%s error=%q", id, tradeNo, updateErr.Error()))
+		}
 		c.JSON(http.StatusOK, gin.H{"message": "error", "data": "拉起支付失败"})
 		return
 	}
