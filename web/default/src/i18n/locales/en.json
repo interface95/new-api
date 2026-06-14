@@ -4620,7 +4620,7 @@
     "Configure BEpusdt USDT checkout integration for top-ups": "Configure BEpusdt USDT checkout integration for top-ups",
     "BEpusdt callback URL: <ServerAddress>/api/bepusdt/webhook. Keep the auth token secret and configure the same token in BEpusdt.": "BEpusdt callback URL: <ServerAddress>/api/bepusdt/webhook. Keep the auth token secret and configure the same token in BEpusdt.",
     "Enable BEpusdt": "Enable BEpusdt",
-    "Trade type": "Trade type",
+    "Allowed currencies": "Allowed currencies",
     "Fiat currency": "Fiat currency",
     "Gateway URL": "Gateway URL",
     "Auth token": "Auth token",

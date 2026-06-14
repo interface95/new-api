@@ -273,7 +273,7 @@ export type BillingSettings = {
   BepusdtEnabled: boolean
   BepusdtGatewayURL: string
   BepusdtAuthToken: string
-  BepusdtTradeType: string
+  BepusdtCurrencies: string
   BepusdtFiat: string
   BepusdtReturnURL: string
   BepusdtUnitPrice: number

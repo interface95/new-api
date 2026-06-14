@@ -105,14 +105,18 @@ func RequestBepusdtPay(c *gin.Context) {
 	}
 
 	callbackAddress := service.GetCallbackAddress()
-	result, err := service.CreateBepusdtTransaction(c.Request.Context(), service.BepusdtCreateTransactionParams{
+	paymentName := fmt.Sprintf("TUC%d", req.Amount)
+	paymentAmount := formatBepusdtAmount(payMoney)
+	notifyURL := callbackAddress + "/api/bepusdt/webhook"
+	redirectURL := getBepusdtReturnURL()
+	result, err := service.CreateBepusdtOrder(c.Request.Context(), service.BepusdtCreateOrderParams{
 		OrderID:     tradeNo,
-		Amount:      formatBepusdtAmount(payMoney),
-		NotifyURL:   callbackAddress + "/api/bepusdt/webhook",
-		RedirectURL: getBepusdtReturnURL(),
-		TradeType:   setting.BepusdtTradeType,
+		Amount:      paymentAmount,
+		NotifyURL:   notifyURL,
+		RedirectURL: redirectURL,
+		Currencies:  setting.BepusdtCurrencies,
 		Fiat:        setting.BepusdtFiat,
-		Name:        fmt.Sprintf("TUC%d", req.Amount),
+		Name:        paymentName,
 	})
 	if err != nil {
 		logger.LogError(c.Request.Context(), fmt.Sprintf("BEpusdt 创建支付交易失败 user_id=%d trade_no=%s error=%q", id, tradeNo, err.Error()))

@@ -38,7 +38,7 @@ export interface BepusdtSettingsValues {
   BepusdtEnabled: boolean
   BepusdtGatewayURL: string
   BepusdtAuthToken: string
-  BepusdtTradeType: string
+  BepusdtCurrencies: string
   BepusdtFiat: string
   BepusdtReturnURL: string
   BepusdtUnitPrice: number
@@ -125,16 +125,17 @@ export function BepusdtSettingsSection(props: Props) {
           <Label>{t('Enable BEpusdt')}</Label>
         </div>
         <div className='grid gap-1.5'>
-          <Label>{t('Trade type')}</Label>
-          <Input
-            placeholder='usdt.trc20'
-            {...form.register('BepusdtTradeType')}
-          />
-        </div>
-        <div className='grid gap-1.5'>
           <Label>{t('Fiat currency')}</Label>
           <Input placeholder='CNY' {...form.register('BepusdtFiat')} />
         </div>
+      </div>
+
+      <div className='grid gap-1.5'>
+        <Label>{t('Allowed currencies')}</Label>
+        <Input
+          placeholder='USDT,USDC'
+          {...form.register('BepusdtCurrencies')}
+        />
       </div>
 
       <div className='grid grid-cols-2 gap-4'>

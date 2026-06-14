@@ -11,18 +11,20 @@ describe('BEpusdt settings persistence', () => {
       BepusdtEnabled: true,
       BepusdtGatewayURL: 'https://pay.example.com/',
       BepusdtAuthToken: '',
-      BepusdtTradeType: 'usdt.trc20',
+      BepusdtCurrencies: 'usdt, USDC , usdt',
       BepusdtFiat: 'CNY',
       BepusdtReturnURL: '',
       BepusdtUnitPrice: 1,
       BepusdtMinTopUp: 50,
     })
     const events: string[] = []
+    const savedValues = new Map<string, string>()
 
     await saveBepusdtSettingsBatch(
       updates,
       async (option) => {
         events.push(`update:${option.key}`)
+        savedValues.set(option.key, option.value)
       },
       async () => {
         events.push('refresh')
@@ -34,5 +36,12 @@ describe('BEpusdt settings persistence', () => {
     assert.ok(
       events.indexOf('update:BepusdtMinTopUp') < events.indexOf('refresh')
     )
+    assert.ok(
+      events.includes('update:BepusdtCurrencies') &&
+      events.indexOf('update:BepusdtCurrencies') < events.indexOf('refresh')
+    )
+    assert.equal(savedValues.get('BepusdtCurrencies'), 'USDT,USDC')
+    assert.ok(!events.includes('update:BepusdtTradeType'))
+    assert.ok(!events.includes('update:BepusdtCashierMode'))
   })
 })

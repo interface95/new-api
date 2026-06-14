@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -109,7 +110,7 @@ func GetTopUpInfo(c *gin.Context) {
 		if !hasBepusdt {
 			bepusdtMinTopup := getBepusdtMinTopup()
 			payMethods = append(payMethods, map[string]string{
-				"name":      "USDT(TRC20)",
+				"name":      getBepusdtPaymentDisplayName(),
 				"type":      model.PaymentMethodBepusdt,
 				"color":     "rgba(var(--semi-green-5), 1)",
 				"min_topup": strconv.FormatInt(bepusdtMinTopup, 10),
@@ -145,6 +146,14 @@ func GetTopUpInfo(c *gin.Context) {
 		"topup_link":              common.TopUpLink,
 	}
 	common.ApiSuccess(c, data)
+}
+
+func getBepusdtPaymentDisplayName() string {
+	currencies := setting.NormalizeBepusdtCurrencies(setting.BepusdtCurrencies)
+	if currencies == "" {
+		return "Crypto Checkout"
+	}
+	return strings.ReplaceAll(currencies, ",", " / ")
 }
 
 type EpayRequest struct {

@@ -4620,7 +4620,7 @@
     "Configure BEpusdt USDT checkout integration for top-ups": "Configurer l'intégration de paiement USDT BEpusdt pour les recharges",
     "BEpusdt callback URL: <ServerAddress>/api/bepusdt/webhook. Keep the auth token secret and configure the same token in BEpusdt.": "URL de rappel BEpusdt : <ServerAddress>/api/bepusdt/webhook. Gardez le jeton d'authentification secret et configurez le même jeton dans BEpusdt.",
     "Enable BEpusdt": "Activer BEpusdt",
-    "Trade type": "Type de transaction",
+    "Allowed currencies": "Devises autorisées",
     "Fiat currency": "Devise fiduciaire",
     "Gateway URL": "URL de la passerelle",
     "Auth token": "Jeton d'authentification",

@@ -1,7 +1,13 @@
 package service
 
 import (
+	"context"
+	"net/http"
+	"net/http/httptest"
 	"testing"
+
+	"github.com/QuantumNous/new-api/common"
+	"github.com/QuantumNous/new-api/setting"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -58,4 +64,72 @@ func TestVerifyBepusdtCallbackRejectsNonSuccessStatus(t *testing.T) {
 	}, "secret")
 
 	assert.ErrorIs(t, VerifyBepusdtCallback("secret", &callback), ErrBepusdtStatusInvalid)
+}
+
+func TestCreateBepusdtOrderUsesCashierEndpointAndCurrencies(t *testing.T) {
+	originalGatewayURL := setting.BepusdtGatewayURL
+	originalAuthToken := setting.BepusdtAuthToken
+	originalFiat := setting.BepusdtFiat
+	t.Cleanup(func() {
+		setting.BepusdtGatewayURL = originalGatewayURL
+		setting.BepusdtAuthToken = originalAuthToken
+		setting.BepusdtFiat = originalFiat
+	})
+
+	var requestPath string
+	var requestParams map[string]interface{}
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		requestPath = r.URL.Path
+		require.NoError(t, common.DecodeJson(r.Body, &requestParams))
+		require.Equal(t, http.MethodPost, r.Method)
+		require.Equal(t, "application/json", r.Header.Get("Content-Type"))
+
+		w.Header().Set("Content-Type", "application/json")
+		_, err := w.Write([]byte(`{
+			"status_code": 200,
+			"message": "success",
+			"data": {
+				"fiat": "CNY",
+				"trade_id": "TRADE1",
+				"order_id": "ORDER1",
+				"amount": "28.88",
+				"expiration_time": 1200,
+				"payment_url": "https://pay.example.com/pay/cashier/TRADE1"
+			}
+		}`))
+		require.NoError(t, err)
+	}))
+	defer server.Close()
+
+	setting.BepusdtGatewayURL = server.URL
+	setting.BepusdtAuthToken = "secret"
+	setting.BepusdtFiat = "CNY"
+
+	result, err := CreateBepusdtOrder(context.Background(), BepusdtCreateOrderParams{
+		OrderID:     "ORDER1",
+		Amount:      "28.88",
+		NotifyURL:   "https://merchant.example.com/api/bepusdt/webhook",
+		RedirectURL: "https://merchant.example.com/console/topup",
+		Currencies:  "usdt, USDC , usdt",
+		Name:        "TUC50",
+	})
+
+	require.NoError(t, err)
+	require.NotNil(t, result)
+	assert.Equal(t, "/api/v1/order/create-order", requestPath)
+	assert.Equal(t, "USDT,USDC", requestParams["currencies"])
+	assert.NotContains(t, requestParams, "trade_type")
+	assert.Equal(t, "https://pay.example.com/pay/cashier/TRADE1", result.PaymentURL)
+	assert.Equal(t, "TRADE1", result.TradeID)
+
+	expectedSignature := SignBepusdtParams(map[string]interface{}{
+		"order_id":     "ORDER1",
+		"amount":       28.88,
+		"notify_url":   "https://merchant.example.com/api/bepusdt/webhook",
+		"redirect_url": "https://merchant.example.com/console/topup",
+		"currencies":   "USDT,USDC",
+		"fiat":         "CNY",
+		"name":         "TUC50",
+	}, "secret")
+	assert.Equal(t, expectedSignature, requestParams["signature"])
 }

@@ -6,6 +6,21 @@ export type BepusdtSettingsUpdate = UpdateOptionRequest & {
   value: string
 }
 
+function normalizeBepusdtCurrencies(value: string): string {
+  const seen = new Set<string>()
+  return value
+    .split(',')
+    .map((currency) => currency.trim().toUpperCase())
+    .filter((currency) => {
+      if (!currency || seen.has(currency)) {
+        return false
+      }
+      seen.add(currency)
+      return true
+    })
+    .join(',')
+}
+
 export function buildBepusdtSettingsUpdates(
   values: BepusdtSettingsValues
 ): BepusdtSettingsUpdate[] {
@@ -16,8 +31,8 @@ export function buildBepusdtSettingsUpdates(
       value: removeTrailingSlash(values.BepusdtGatewayURL || ''),
     },
     {
-      key: 'BepusdtTradeType',
-      value: values.BepusdtTradeType || 'usdt.trc20',
+      key: 'BepusdtCurrencies',
+      value: normalizeBepusdtCurrencies(values.BepusdtCurrencies || ''),
     },
     { key: 'BepusdtFiat', value: values.BepusdtFiat || 'CNY' },
     {

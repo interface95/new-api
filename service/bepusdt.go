@@ -25,9 +25,8 @@ const (
 	BepusdtStatusSuccess = 2
 	BepusdtStatusExpired = 3
 
-	bepusdtCreateTransactionPath = "/api/v1/order/create-transaction"
-	BepusdtDefaultTradeType      = "usdt.trc20"
-	BepusdtDefaultFiat           = "CNY"
+	bepusdtCreateOrderPath = "/api/v1/order/create-order"
+	BepusdtDefaultFiat     = "CNY"
 )
 
 var (
@@ -38,12 +37,12 @@ var (
 	ErrBepusdtStatusInvalid    = errors.New("bepusdt status invalid")
 )
 
-type BepusdtCreateTransactionParams struct {
+type BepusdtCreateOrderParams struct {
 	OrderID     string `json:"order_id"`
 	Amount      string `json:"amount"`
 	NotifyURL   string `json:"notify_url"`
 	RedirectURL string `json:"redirect_url"`
-	TradeType   string `json:"trade_type"`
+	Currencies  string `json:"currencies"`
 	Fiat        string `json:"fiat"`
 	Name        string `json:"name,omitempty"`
 }
@@ -132,17 +131,11 @@ func VerifyBepusdtCallbackSignature(authToken string, data *BepusdtCallbackData)
 	return nil
 }
 
-func CreateBepusdtTransaction(ctx context.Context, params BepusdtCreateTransactionParams) (*BepusdtCreateTransactionResult, error) {
+func CreateBepusdtOrder(ctx context.Context, params BepusdtCreateOrderParams) (*BepusdtCreateTransactionResult, error) {
 	gatewayURL := strings.TrimRight(strings.TrimSpace(setting.BepusdtGatewayURL), "/")
 	authToken := strings.TrimSpace(setting.BepusdtAuthToken)
 	if gatewayURL == "" || authToken == "" || params.OrderID == "" || params.Amount == "" || params.NotifyURL == "" || params.RedirectURL == "" {
 		return nil, ErrBepusdtConfigInvalid
-	}
-	if params.TradeType == "" {
-		params.TradeType = setting.BepusdtTradeType
-	}
-	if strings.TrimSpace(params.TradeType) == "" {
-		params.TradeType = BepusdtDefaultTradeType
 	}
 	if params.Fiat == "" {
 		params.Fiat = setting.BepusdtFiat
@@ -150,6 +143,10 @@ func CreateBepusdtTransaction(ctx context.Context, params BepusdtCreateTransacti
 	if strings.TrimSpace(params.Fiat) == "" {
 		params.Fiat = BepusdtDefaultFiat
 	}
+	if params.Currencies == "" {
+		params.Currencies = setting.BepusdtCurrencies
+	}
+	params.Currencies = setting.NormalizeBepusdtCurrencies(params.Currencies)
 
 	amountDecimal, err := decimal.NewFromString(params.Amount)
 	if err != nil || !amountDecimal.IsPositive() {
@@ -162,19 +159,26 @@ func CreateBepusdtTransaction(ctx context.Context, params BepusdtCreateTransacti
 		"amount":       amountValue,
 		"notify_url":   params.NotifyURL,
 		"redirect_url": params.RedirectURL,
-		"trade_type":   params.TradeType,
 		"fiat":         params.Fiat,
+	}
+	if strings.TrimSpace(params.Currencies) != "" {
+		requestParams["currencies"] = params.Currencies
 	}
 	if strings.TrimSpace(params.Name) != "" {
 		requestParams["name"] = params.Name
 	}
+
+	return createBepusdtPayment(ctx, gatewayURL, authToken, bepusdtCreateOrderPath, requestParams)
+}
+
+func createBepusdtPayment(ctx context.Context, gatewayURL string, authToken string, path string, requestParams map[string]interface{}) (*BepusdtCreateTransactionResult, error) {
 	requestParams["signature"] = SignBepusdtParams(requestParams, authToken)
 
 	body, err := common.Marshal(requestParams)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %v", ErrBepusdtRequestFailed, err)
 	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, gatewayURL+bepusdtCreateTransactionPath, bytes.NewReader(body))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, gatewayURL+path, bytes.NewReader(body))
 	if err != nil {
 		return nil, fmt.Errorf("%w: %v", ErrBepusdtRequestFailed, err)
 	}

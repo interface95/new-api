@@ -118,7 +118,7 @@ func InitOptionMap() {
 	common.OptionMap["BepusdtEnabled"] = strconv.FormatBool(setting.BepusdtEnabled)
 	common.OptionMap["BepusdtGatewayURL"] = setting.BepusdtGatewayURL
 	common.OptionMap["BepusdtAuthToken"] = setting.BepusdtAuthToken
-	common.OptionMap["BepusdtTradeType"] = setting.BepusdtTradeType
+	common.OptionMap["BepusdtCurrencies"] = setting.BepusdtCurrencies
 	common.OptionMap["BepusdtFiat"] = setting.BepusdtFiat
 	common.OptionMap["BepusdtReturnURL"] = setting.BepusdtReturnURL
 	common.OptionMap["BepusdtUnitPrice"] = strconv.FormatFloat(setting.BepusdtUnitPrice, 'f', -1, 64)
@@ -480,8 +480,8 @@ func updateOptionMap(key string, value string) (err error) {
 		setting.BepusdtGatewayURL = value
 	case "BepusdtAuthToken":
 		setting.BepusdtAuthToken = value
-	case "BepusdtTradeType":
-		setting.BepusdtTradeType = value
+	case "BepusdtCurrencies":
+		setting.BepusdtCurrencies = value
 	case "BepusdtFiat":
 		setting.BepusdtFiat = value
 	case "BepusdtReturnURL":

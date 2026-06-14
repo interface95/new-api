@@ -4620,7 +4620,7 @@
     "Configure BEpusdt USDT checkout integration for top-ups": "チャージ用の BEpusdt USDT チェックアウト連携を設定します",
     "BEpusdt callback URL: <ServerAddress>/api/bepusdt/webhook. Keep the auth token secret and configure the same token in BEpusdt.": "BEpusdt コールバック URL: <ServerAddress>/api/bepusdt/webhook。認証トークンは秘密に保管し、BEpusdt に同じトークンを設定してください。",
     "Enable BEpusdt": "BEpusdt を有効化",
-    "Trade type": "取引タイプ",
+    "Allowed currencies": "許可する通貨",
     "Fiat currency": "法定通貨",
     "Gateway URL": "ゲートウェイ URL",
     "Auth token": "認証トークン",

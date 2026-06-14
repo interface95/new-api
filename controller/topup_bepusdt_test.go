@@ -79,12 +79,14 @@ func TestGetTopUpInfoUsesBepusdtTokenDisplayMinimum(t *testing.T) {
 	originalEnabled := setting.BepusdtEnabled
 	originalGatewayURL := setting.BepusdtGatewayURL
 	originalAuthToken := setting.BepusdtAuthToken
+	originalCurrencies := setting.BepusdtCurrencies
 	originalMinTopUp := setting.BepusdtMinTopUp
 	originalQuotaDisplayType := operation_setting.GetGeneralSetting().QuotaDisplayType
 	t.Cleanup(func() {
 		setting.BepusdtEnabled = originalEnabled
 		setting.BepusdtGatewayURL = originalGatewayURL
 		setting.BepusdtAuthToken = originalAuthToken
+		setting.BepusdtCurrencies = originalCurrencies
 		setting.BepusdtMinTopUp = originalMinTopUp
 		operation_setting.GetGeneralSetting().QuotaDisplayType = originalQuotaDisplayType
 	})
@@ -92,6 +94,7 @@ func TestGetTopUpInfoUsesBepusdtTokenDisplayMinimum(t *testing.T) {
 	setting.BepusdtEnabled = true
 	setting.BepusdtGatewayURL = "https://pay.example.com"
 	setting.BepusdtAuthToken = "secret"
+	setting.BepusdtCurrencies = "USDT,USDC"
 	setting.BepusdtMinTopUp = 2
 	operation_setting.GetGeneralSetting().QuotaDisplayType = operation_setting.QuotaDisplayTypeTokens
 
@@ -114,7 +117,7 @@ func TestGetTopUpInfoUsesBepusdtTokenDisplayMinimum(t *testing.T) {
 	expectedMinTopup := fmt.Sprintf("%.0f", common.QuotaPerUnit*2)
 	require.Equal(t, int64(common.QuotaPerUnit*2), response.Data.BepusdtMinTopUp)
 	require.Contains(t, response.Data.PayMethods, map[string]string{
-		"name":      "USDT(TRC20)",
+		"name":      "USDT / USDC",
 		"type":      model.PaymentMethodBepusdt,
 		"color":     "rgba(var(--semi-green-5), 1)",
 		"min_topup": expectedMinTopup,

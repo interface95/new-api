@@ -109,7 +109,7 @@ const defaultBillingSettings: BillingSettingsValues = {
   BepusdtEnabled: false,
   BepusdtGatewayURL: '',
   BepusdtAuthToken: '',
-  BepusdtTradeType: 'usdt.trc20',
+  BepusdtCurrencies: 'USDT',
   BepusdtFiat: 'CNY',
   BepusdtReturnURL: '',
   BepusdtUnitPrice: 1,

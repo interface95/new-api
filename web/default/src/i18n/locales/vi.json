@@ -4620,7 +4620,7 @@
     "Configure BEpusdt USDT checkout integration for top-ups": "Cấu hình tích hợp thanh toán USDT BEpusdt cho nạp tiền",
     "BEpusdt callback URL: <ServerAddress>/api/bepusdt/webhook. Keep the auth token secret and configure the same token in BEpusdt.": "URL callback BEpusdt: <ServerAddress>/api/bepusdt/webhook. Hãy giữ bí mật mã xác thực và cấu hình cùng mã trong BEpusdt.",
     "Enable BEpusdt": "Bật BEpusdt",
-    "Trade type": "Loại giao dịch",
+    "Allowed currencies": "Tiền mã hóa được phép",
     "Fiat currency": "Tiền pháp định",
     "Gateway URL": "URL cổng",
     "Auth token": "Mã xác thực",

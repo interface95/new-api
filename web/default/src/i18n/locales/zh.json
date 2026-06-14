@@ -4620,7 +4620,7 @@
     "Configure BEpusdt USDT checkout integration for top-ups": "配置用于充值的 BEpusdt USDT 收银台集成",
     "BEpusdt callback URL: <ServerAddress>/api/bepusdt/webhook. Keep the auth token secret and configure the same token in BEpusdt.": "BEpusdt 回调地址：<ServerAddress>/api/bepusdt/webhook。请妥善保管认证令牌，并在 BEpusdt 中配置相同令牌。",
     "Enable BEpusdt": "启用 BEpusdt",
-    "Trade type": "交易类型",
+    "Allowed currencies": "允许币种",
     "Fiat currency": "法币币种",
     "Gateway URL": "网关地址",
     "Auth token": "认证令牌",

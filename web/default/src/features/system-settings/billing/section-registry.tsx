@@ -179,7 +179,7 @@ const BILLING_SECTIONS = [
           BepusdtEnabled: settings.BepusdtEnabled ?? false,
           BepusdtGatewayURL: settings.BepusdtGatewayURL ?? '',
           BepusdtAuthToken: settings.BepusdtAuthToken ?? '',
-          BepusdtTradeType: settings.BepusdtTradeType ?? 'usdt.trc20',
+          BepusdtCurrencies: settings.BepusdtCurrencies ?? 'USDT',
           BepusdtFiat: settings.BepusdtFiat ?? 'CNY',
           BepusdtReturnURL: settings.BepusdtReturnURL ?? '',
           BepusdtUnitPrice: settings.BepusdtUnitPrice ?? 1,
