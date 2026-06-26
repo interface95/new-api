@@ -554,6 +554,11 @@ func RelayTask(c *gin.Context) {
 
 		result, taskErr = relay.RelayTaskSubmit(c, relayInfo)
 		if taskErr == nil {
+			channelId := channel.Id
+			usingKey := common.GetContextKeyString(c, constant.ContextKeyChannelKey)
+			gopool.Go(func() {
+				service.RecordChannelSuccess(channelId, usingKey)
+			})
 			break
 		}
 
