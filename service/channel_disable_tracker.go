@@ -116,7 +116,7 @@ func (tracker *autoDisableFailureTracker) recordMemory(key string, now time.Time
 	defer tracker.mu.Unlock()
 
 	record := tracker.records[key]
-	if record.LastFailureAt.IsZero() || now.Sub(record.LastFailureAt) > ttl {
+	if record.LastFailureAt.IsZero() || now.Sub(record.LastFailureAt) >= ttl {
 		record.Count = 0
 	}
 	record.Count++

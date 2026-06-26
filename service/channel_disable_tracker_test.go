@@ -56,6 +56,15 @@ func TestMemoryFallbackCountsConsecutiveFailuresAndExpiresByTTL(t *testing.T) {
 	require.Equal(t, 1, tracker.recordMemory(key, now.Add(2*time.Minute), time.Minute))
 }
 
+func TestMemoryFallbackResetsAtExactTTLBoundary(t *testing.T) {
+	tracker := newAutoDisableFailureTracker()
+	key := autoDisableFailureKey(7, "sk-a")
+	now := time.Unix(1_800_000_000, 0)
+
+	require.Equal(t, 1, tracker.recordMemory(key, now, time.Minute))
+	require.Equal(t, 1, tracker.recordMemory(key, now.Add(time.Minute), time.Minute))
+}
+
 func TestIncrChannelFailureUsesMemoryFallbackWhenRedisDisabled(t *testing.T) {
 	withDisabledRedis(t)
 
