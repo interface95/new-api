@@ -238,6 +238,26 @@ func RedisHGetObj(key string, obj interface{}) error {
 	return nil
 }
 
+var redisIncrWithTTLScript = redis.NewScript(`
+local n = redis.call('INCR', KEYS[1])
+redis.call('EXPIRE', KEYS[1], ARGV[1])
+return n
+`)
+
+func RedisIncrWithTTL(key string, ttlSeconds int) (int64, error) {
+	if !RedisEnabled || RDB == nil {
+		return 0, errors.New("redis is not enabled")
+	}
+	if ttlSeconds < 1 {
+		ttlSeconds = 1
+	}
+	if DebugEnabled {
+		SysLog(fmt.Sprintf("Redis INCRWITHTTL: key=%s, ttl=%d", key, ttlSeconds))
+	}
+	ctx := context.Background()
+	return redisIncrWithTTLScript.Run(ctx, RDB, []string{key}, ttlSeconds).Int64()
+}
+
 // RedisIncr Add this function to handle atomic increments
 func RedisIncr(key string, delta int64) error {
 	if DebugEnabled {
