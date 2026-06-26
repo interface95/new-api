@@ -58,6 +58,16 @@ const routingReliabilitySchema = z
     RetryTimes: z.coerce.number().min(0).max(10),
     ChannelDisableThreshold: numericString,
     AutomaticDisableChannelEnabled: z.boolean(),
+    AutomaticDisableFailureThreshold: z.coerce
+      .number()
+      .int()
+      .min(1, 'Failure count must be at least 1')
+      .max(100, 'Failure count must be at most 100'),
+    AutomaticDisableFailureWindowSeconds: z.coerce
+      .number()
+      .int()
+      .min(1, 'Window must be at least 1 second')
+      .max(86400, 'Window must be at most 86400 seconds'),
     AutomaticEnableChannelEnabled: z.boolean(),
     AutomaticDisableKeywords: z.string(),
     AutomaticDisableStatusCodes: z.string(),
@@ -106,6 +116,8 @@ type RoutingReliabilitySectionProps = {
     RetryTimes: number
     ChannelDisableThreshold: string
     AutomaticDisableChannelEnabled: boolean
+    AutomaticDisableFailureThreshold: number
+    AutomaticDisableFailureWindowSeconds: number
     AutomaticEnableChannelEnabled: boolean
     AutomaticDisableKeywords: string
     AutomaticDisableStatusCodes: string
@@ -123,6 +135,8 @@ type NormalizedRoutingReliabilityValues = {
   RetryTimes: number
   ChannelDisableThreshold: string
   AutomaticDisableChannelEnabled: boolean
+  AutomaticDisableFailureThreshold: number
+  AutomaticDisableFailureWindowSeconds: number
   AutomaticEnableChannelEnabled: boolean
   AutomaticDisableKeywords: string
   AutomaticDisableStatusCodes: string
@@ -137,6 +151,10 @@ const buildFormDefaults = (
   RetryTimes: defaults.RetryTimes ?? 0,
   ChannelDisableThreshold: defaults.ChannelDisableThreshold ?? '',
   AutomaticDisableChannelEnabled: defaults.AutomaticDisableChannelEnabled,
+  AutomaticDisableFailureThreshold:
+    defaults.AutomaticDisableFailureThreshold ?? 1,
+  AutomaticDisableFailureWindowSeconds:
+    defaults.AutomaticDisableFailureWindowSeconds ?? 300,
   AutomaticEnableChannelEnabled: defaults.AutomaticEnableChannelEnabled,
   AutomaticDisableKeywords: normalizeLineEndings(
     defaults.AutomaticDisableKeywords ?? ''
@@ -157,6 +175,10 @@ const normalizeDefaults = (
   RetryTimes: defaults.RetryTimes ?? 0,
   ChannelDisableThreshold: (defaults.ChannelDisableThreshold ?? '').trim(),
   AutomaticDisableChannelEnabled: defaults.AutomaticDisableChannelEnabled,
+  AutomaticDisableFailureThreshold:
+    defaults.AutomaticDisableFailureThreshold ?? 1,
+  AutomaticDisableFailureWindowSeconds:
+    defaults.AutomaticDisableFailureWindowSeconds ?? 300,
   AutomaticEnableChannelEnabled: defaults.AutomaticEnableChannelEnabled,
   AutomaticDisableKeywords: normalizeLineEndings(
     defaults.AutomaticDisableKeywords ?? ''
@@ -179,6 +201,9 @@ const normalizeFormValues = (
   RetryTimes: values.RetryTimes,
   ChannelDisableThreshold: values.ChannelDisableThreshold.trim(),
   AutomaticDisableChannelEnabled: values.AutomaticDisableChannelEnabled,
+  AutomaticDisableFailureThreshold: values.AutomaticDisableFailureThreshold,
+  AutomaticDisableFailureWindowSeconds:
+    values.AutomaticDisableFailureWindowSeconds,
   AutomaticEnableChannelEnabled: values.AutomaticEnableChannelEnabled,
   AutomaticDisableKeywords: normalizeLineEndings(
     values.AutomaticDisableKeywords
@@ -413,7 +438,9 @@ export function RoutingReliabilitySection({
                     <SettingsSwitchContent>
                       <FormLabel>{t('Disable on failure')}</FormLabel>
                       <FormDescription>
-                        {t('Automatically disable channels when tests fail')}
+                        {t(
+                          'Automatically disable channels after consecutive matching failures. Redis shares counters across replicas; without Redis, counting falls back to this instance only.'
+                        )}
                       </FormDescription>
                     </SettingsSwitchContent>
                     <FormControl>
@@ -423,6 +450,56 @@ export function RoutingReliabilitySection({
                       />
                     </FormControl>
                   </SettingsSwitchItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='AutomaticDisableFailureThreshold'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('Consecutive failure threshold')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type='number'
+                        min={1}
+                        max={100}
+                        step={1}
+                        {...safeNumberFieldProps(field)}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      {t(
+                        'Disable only after this many consecutive matching failures occur.'
+                      )}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='AutomaticDisableFailureWindowSeconds'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('Failure counter TTL (seconds)')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type='number'
+                        min={1}
+                        max={86400}
+                        step={1}
+                        {...safeNumberFieldProps(field)}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      {t(
+                        'If no new matching failure occurs before this TTL expires, the consecutive failure count resets.'
+                      )}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
                 )}
               />
 
