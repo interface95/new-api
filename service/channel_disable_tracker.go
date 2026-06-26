@@ -65,17 +65,6 @@ func shouldDisableByFailureCount(count, threshold int) bool {
 	return count >= threshold
 }
 
-func (tracker *autoDisableFailureTracker) record(key string, _ time.Time, threshold int, window time.Duration) autoDisableDecision {
-	count, backend := incrChannelFailure(key, window)
-	return autoDisableDecision{
-		ShouldDisable: shouldDisableByFailureCount(count, threshold),
-		Count:         count,
-		Threshold:     threshold,
-		Window:        window,
-		Backend:       backend,
-	}
-}
-
 func incrChannelFailure(key string, ttl time.Duration) (int, string) {
 	if ttl <= 0 {
 		ttl = time.Second

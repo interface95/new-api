@@ -49,7 +49,7 @@ func DisableChannelImmediately(channelError types.ChannelError, reason string) {
 
 // disable & notify
 func DisableChannel(channelError types.ChannelError, reason string) {
-	common.SysLog(fmt.Sprintf("通道「%s」（#%d）发生错误，准备禁用，原因：%s", channelError.ChannelName, channelError.ChannelId, common.LocalLogPreview(reason)))
+	common.SysLog(fmt.Sprintf("通道「%s」（#%d）发生错误，进入自动禁用检查，原因：%s", channelError.ChannelName, channelError.ChannelId, common.LocalLogPreview(reason)))
 
 	// 检查是否启用自动禁用功能
 	if !channelError.AutoBan {
