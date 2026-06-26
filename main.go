@@ -306,6 +306,7 @@ func InitResources() error {
 	if err != nil {
 		return err
 	}
+	common.WarnAutomaticDisableFallbackIfNeeded("startup")
 
 	perfmetrics.Init()
 

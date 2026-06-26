@@ -46,6 +46,8 @@ func InitOptionMap() {
 	common.OptionMap["TurnstileCheckEnabled"] = strconv.FormatBool(common.TurnstileCheckEnabled)
 	common.OptionMap["RegisterEnabled"] = strconv.FormatBool(common.RegisterEnabled)
 	common.OptionMap["AutomaticDisableChannelEnabled"] = strconv.FormatBool(common.AutomaticDisableChannelEnabled)
+	common.OptionMap["AutomaticDisableFailureThreshold"] = strconv.Itoa(common.AutomaticDisableFailureThreshold)
+	common.OptionMap["AutomaticDisableFailureWindowSeconds"] = strconv.Itoa(common.AutomaticDisableFailureWindowSeconds)
 	common.OptionMap["AutomaticEnableChannelEnabled"] = strconv.FormatBool(common.AutomaticEnableChannelEnabled)
 	common.OptionMap["LogConsumeEnabled"] = strconv.FormatBool(common.LogConsumeEnabled)
 	common.OptionMap["DisplayInCurrencyEnabled"] = strconv.FormatBool(common.DisplayInCurrencyEnabled)
@@ -312,6 +314,7 @@ func updateOptionMap(key string, value string) (err error) {
 			common.EmailAliasRestrictionEnabled = boolValue
 		case "AutomaticDisableChannelEnabled":
 			common.AutomaticDisableChannelEnabled = boolValue
+			common.WarnAutomaticDisableFallbackIfNeeded("option update")
 		case "AutomaticEnableChannelEnabled":
 			common.AutomaticEnableChannelEnabled = boolValue
 		case "LogConsumeEnabled":
@@ -578,6 +581,16 @@ func updateOptionMap(key string, value string) (err error) {
 	//	common.ChatLink2 = value
 	case "ChannelDisableThreshold":
 		common.ChannelDisableThreshold, _ = strconv.ParseFloat(value, 64)
+	case "AutomaticDisableFailureThreshold":
+		common.AutomaticDisableFailureThreshold, _ = strconv.Atoi(value)
+		if common.AutomaticDisableFailureThreshold < 1 {
+			common.AutomaticDisableFailureThreshold = 1
+		}
+	case "AutomaticDisableFailureWindowSeconds":
+		common.AutomaticDisableFailureWindowSeconds, _ = strconv.Atoi(value)
+		if common.AutomaticDisableFailureWindowSeconds < 1 {
+			common.AutomaticDisableFailureWindowSeconds = 1
+		}
 	case "QuotaPerUnit":
 		common.QuotaPerUnit, _ = strconv.ParseFloat(value, 64)
 	case "SensitiveWords":
