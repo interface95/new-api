@@ -948,8 +948,11 @@ func testAllChannels(notify bool) error {
 				}
 			}
 
-			usingKey := common.GetContextKeyString(result.context, constant.ContextKeyChannelKey)
-			if newAPIError == nil && !shouldBanChannel {
+			usingKey := ""
+			if result.context != nil {
+				usingKey = common.GetContextKeyString(result.context, constant.ContextKeyChannelKey)
+			}
+			if result.localErr == nil && newAPIError == nil && !shouldBanChannel {
 				service.RecordChannelSuccess(channel.Id, usingKey)
 			}
 
