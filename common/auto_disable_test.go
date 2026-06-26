@@ -13,6 +13,10 @@ func TestWarnAutomaticDisableFallbackIfNeededSuppressesRepeatedSameState(t *test
 	oldEnabled := AutomaticDisableChannelEnabled
 	oldRedisEnabled := RedisEnabled
 	oldRDB := RDB
+	autoDisableFallbackWarningMu.Lock()
+	oldWarnings := autoDisableFallbackWarningLast
+	autoDisableFallbackWarningLast = map[string]autoDisableFallbackWarningCondition{}
+	autoDisableFallbackWarningMu.Unlock()
 	AutomaticDisableChannelEnabled = true
 	RedisEnabled = false
 	RDB = nil
@@ -20,6 +24,9 @@ func TestWarnAutomaticDisableFallbackIfNeededSuppressesRepeatedSameState(t *test
 		AutomaticDisableChannelEnabled = oldEnabled
 		RedisEnabled = oldRedisEnabled
 		RDB = oldRDB
+		autoDisableFallbackWarningMu.Lock()
+		autoDisableFallbackWarningLast = oldWarnings
+		autoDisableFallbackWarningMu.Unlock()
 	})
 
 	var output bytes.Buffer
