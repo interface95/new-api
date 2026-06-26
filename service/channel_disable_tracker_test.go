@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/QuantumNous/new-api/common"
+	"github.com/QuantumNous/new-api/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -91,4 +92,46 @@ func TestResetChannelFailureClearsMemoryFallback(t *testing.T) {
 	count, backend = incrChannelFailure(key, time.Minute)
 	require.Equal(t, 1, count)
 	require.Equal(t, autoDisableBackendMemory, backend)
+}
+
+func TestRecordChannelSuccessClearsContinuousFailureCounter(t *testing.T) {
+	withDisabledRedis(t)
+
+	key := autoDisableFailureKey(12, "sk-success")
+	count, backend := incrChannelFailure(key, time.Minute)
+	require.Equal(t, 1, count)
+	require.Equal(t, autoDisableBackendMemory, backend)
+
+	RecordChannelSuccess(12, "sk-success")
+
+	count, backend = incrChannelFailure(key, time.Minute)
+	require.Equal(t, 1, count)
+	require.Equal(t, autoDisableBackendMemory, backend)
+}
+
+func TestRecordChannelAutoDisableFailureUsesConfiguredThreshold(t *testing.T) {
+	withDisabledRedis(t)
+
+	oldThreshold := common.AutomaticDisableFailureThreshold
+	oldWindow := common.AutomaticDisableFailureWindowSeconds
+	common.AutomaticDisableFailureThreshold = 2
+	common.AutomaticDisableFailureWindowSeconds = 60
+	t.Cleanup(func() {
+		common.AutomaticDisableFailureThreshold = oldThreshold
+		common.AutomaticDisableFailureWindowSeconds = oldWindow
+	})
+
+	channelError := *types.NewChannelError(13, 1, "threshold-test", false, "sk-threshold", true)
+
+	decision := recordChannelAutoDisableFailure(channelError)
+	require.False(t, decision.ShouldDisable)
+	require.Equal(t, 1, decision.Count)
+	require.Equal(t, 2, decision.Threshold)
+	require.Equal(t, autoDisableBackendMemory, decision.Backend)
+
+	decision = recordChannelAutoDisableFailure(channelError)
+	require.True(t, decision.ShouldDisable)
+	require.Equal(t, 2, decision.Count)
+	require.Equal(t, time.Minute, decision.Window)
+	require.Equal(t, autoDisableBackendMemory, decision.Backend)
 }
