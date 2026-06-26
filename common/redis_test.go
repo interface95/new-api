@@ -17,13 +17,12 @@ func withMiniRedis(t *testing.T) *miniredis.Miniredis {
 
 	oldEnabled := RedisEnabled
 	oldRDB := RDB
+	client := redis.NewClient(&redis.Options{Addr: server.Addr()})
 	RedisEnabled = true
-	RDB = redis.NewClient(&redis.Options{Addr: server.Addr()})
+	RDB = client
 
 	t.Cleanup(func() {
-		if RDB != nil {
-			require.NoError(t, RDB.Close())
-		}
+		require.NoError(t, client.Close())
 		RDB = oldRDB
 		RedisEnabled = oldEnabled
 		server.Close()
