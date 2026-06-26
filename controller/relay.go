@@ -223,6 +223,10 @@ func Relay(c *gin.Context, relayFormat types.RelayFormat) {
 
 		if newAPIError == nil {
 			relayInfo.LastError = nil
+			usingKey := common.GetContextKeyString(c, constant.ContextKeyChannelKey)
+			gopool.Go(func() {
+				service.RecordChannelSuccess(channel.Id, usingKey)
+			})
 			return
 		}
 

@@ -948,14 +948,19 @@ func testAllChannels(notify bool) error {
 				}
 			}
 
+			usingKey := common.GetContextKeyString(result.context, constant.ContextKeyChannelKey)
+			if newAPIError == nil && !shouldBanChannel {
+				service.RecordChannelSuccess(channel.Id, usingKey)
+			}
+
 			// disable channel
 			if isChannelEnabled && shouldBanChannel && channel.GetAutoBan() {
-				processChannelError(result.context, *types.NewChannelError(channel.Id, channel.Type, channel.Name, channel.ChannelInfo.IsMultiKey, common.GetContextKeyString(result.context, constant.ContextKeyChannelKey), channel.GetAutoBan()), newAPIError)
+				processChannelError(result.context, *types.NewChannelError(channel.Id, channel.Type, channel.Name, channel.ChannelInfo.IsMultiKey, usingKey, channel.GetAutoBan()), newAPIError)
 			}
 
 			// enable channel
 			if !isChannelEnabled && service.ShouldEnableChannel(newAPIError, channel.Status) {
-				service.EnableChannel(channel.Id, common.GetContextKeyString(result.context, constant.ContextKeyChannelKey), channel.Name)
+				service.EnableChannel(channel.Id, usingKey, channel.Name)
 			}
 
 			channel.UpdateResponseTime(milliseconds)
