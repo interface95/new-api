@@ -586,11 +586,13 @@ func updateOptionMap(key string, value string) (err error) {
 		if common.AutomaticDisableFailureThreshold < 1 {
 			common.AutomaticDisableFailureThreshold = 1
 		}
+		common.OptionMap[key] = strconv.Itoa(common.AutomaticDisableFailureThreshold)
 	case "AutomaticDisableFailureWindowSeconds":
 		common.AutomaticDisableFailureWindowSeconds, _ = strconv.Atoi(value)
 		if common.AutomaticDisableFailureWindowSeconds < 1 {
 			common.AutomaticDisableFailureWindowSeconds = 1
 		}
+		common.OptionMap[key] = strconv.Itoa(common.AutomaticDisableFailureWindowSeconds)
 	case "QuotaPerUnit":
 		common.QuotaPerUnit, _ = strconv.ParseFloat(value, 64)
 	case "SensitiveWords":

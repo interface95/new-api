@@ -46,7 +46,9 @@ func TestUpdateOptionMapClampsAutoDisableFailureWindowSettings(t *testing.T) {
 
 	require.NoError(t, updateOptionMap("AutomaticDisableFailureThreshold", "0"))
 	require.Equal(t, 1, common.AutomaticDisableFailureThreshold)
+	require.Equal(t, "1", common.OptionMap["AutomaticDisableFailureThreshold"])
 
 	require.NoError(t, updateOptionMap("AutomaticDisableFailureWindowSeconds", "-5"))
 	require.Equal(t, 1, common.AutomaticDisableFailureWindowSeconds)
+	require.Equal(t, "1", common.OptionMap["AutomaticDisableFailureWindowSeconds"])
 }

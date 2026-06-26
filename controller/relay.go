@@ -224,9 +224,7 @@ func Relay(c *gin.Context, relayFormat types.RelayFormat) {
 		if newAPIError == nil {
 			relayInfo.LastError = nil
 			usingKey := common.GetContextKeyString(c, constant.ContextKeyChannelKey)
-			gopool.Go(func() {
-				service.RecordChannelSuccess(channel.Id, usingKey)
-			})
+			service.RecordChannelSuccess(channel.Id, usingKey)
 			return
 		}
 
@@ -360,12 +358,8 @@ func shouldRetry(c *gin.Context, openaiErr *types.NewAPIError, retryTimes int) b
 
 func processChannelError(c *gin.Context, channelError types.ChannelError, err *types.NewAPIError) {
 	logger.LogError(c, fmt.Sprintf("channel error (channel #%d, status code: %d): %s", channelError.ChannelId, err.StatusCode, common.LocalLogPreview(err.Error())))
-	// 不要使用context获取渠道信息，异步处理时可能会出现渠道信息不一致的情况
-	// do not use context to get channel info, there may be inconsistent channel info when processing asynchronously
 	if service.ShouldDisableChannel(err) && channelError.AutoBan {
-		gopool.Go(func() {
-			service.DisableChannel(channelError, err.ErrorWithStatusCode())
-		})
+		service.DisableChannel(channelError, err.ErrorWithStatusCode())
 	}
 
 	if constant.ErrorLogEnabled && types.IsRecordErrorLog(err) {
@@ -556,9 +550,7 @@ func RelayTask(c *gin.Context) {
 		if taskErr == nil {
 			channelId := channel.Id
 			usingKey := common.GetContextKeyString(c, constant.ContextKeyChannelKey)
-			gopool.Go(func() {
-				service.RecordChannelSuccess(channelId, usingKey)
-			})
+			service.RecordChannelSuccess(channelId, usingKey)
 			break
 		}
 

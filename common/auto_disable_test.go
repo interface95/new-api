@@ -1,0 +1,40 @@
+package common
+
+import (
+	"bytes"
+	"strings"
+	"testing"
+
+	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/require"
+)
+
+func TestWarnAutomaticDisableFallbackIfNeededSuppressesRepeatedSameState(t *testing.T) {
+	oldEnabled := AutomaticDisableChannelEnabled
+	oldRedisEnabled := RedisEnabled
+	oldRDB := RDB
+	AutomaticDisableChannelEnabled = true
+	RedisEnabled = false
+	RDB = nil
+	t.Cleanup(func() {
+		AutomaticDisableChannelEnabled = oldEnabled
+		RedisEnabled = oldRedisEnabled
+		RDB = oldRDB
+	})
+
+	var output bytes.Buffer
+	LogWriterMu.Lock()
+	oldWriter := gin.DefaultErrorWriter
+	gin.DefaultErrorWriter = &output
+	LogWriterMu.Unlock()
+	t.Cleanup(func() {
+		LogWriterMu.Lock()
+		gin.DefaultErrorWriter = oldWriter
+		LogWriterMu.Unlock()
+	})
+
+	WarnAutomaticDisableFallbackIfNeeded("option update")
+	WarnAutomaticDisableFallbackIfNeeded("option update")
+
+	require.Equal(t, 1, strings.Count(output.String(), "single-process memory fallback"))
+}
