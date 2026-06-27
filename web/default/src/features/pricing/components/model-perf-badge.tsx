@@ -32,6 +32,8 @@ export interface ModelPerfBadgeProps extends React.HTMLAttributes<HTMLDivElement
   perf: ModelPerfBadgeData | undefined
 }
 
+const STATUS_BAR_COUNT = 14
+
 function formatCompactNumber(value: number): string {
   if (!Number.isFinite(value) || value <= 0) return '—'
   return value > 1 ? String(Math.round(value)) : value.toFixed(1)
@@ -64,16 +66,18 @@ export const ModelPerfBadge = memo(function ModelPerfBadge(
     props.perf.recent_success_rates?.filter((rate) => Number.isFinite(rate)) ??
     []
   const statusRates =
-    recentRates.length > 0 ? recentRates.slice(-3) : [success_rate]
+    recentRates.length > 0
+      ? recentRates.slice(-STATUS_BAR_COUNT)
+      : Array(STATUS_BAR_COUNT).fill(success_rate)
   const statusBars = [
-    ...Array(Math.max(0, 3 - statusRates.length)).fill(null),
+    ...Array(Math.max(0, STATUS_BAR_COUNT - statusRates.length)).fill(null),
     ...statusRates,
-  ].slice(-3)
+  ].slice(-STATUS_BAR_COUNT)
 
   return (
     <div
       className={cn(
-        'hidden w-[132px] grid-cols-[38px_48px_30px] gap-x-2 text-right tabular-nums min-[460px]:grid',
+        'hidden w-[214px] grid-cols-[40px_50px_minmax(108px,1fr)] gap-x-2 text-right tabular-nums min-[520px]:grid xl:w-[232px] xl:grid-cols-[42px_54px_minmax(120px,1fr)]',
         props.className
       )}
     >
@@ -100,17 +104,17 @@ export const ModelPerfBadge = memo(function ModelPerfBadge(
         <div className='text-muted-foreground/55 truncate text-[10px] leading-4'>
           {t('Status short')}
         </div>
-        <div className='flex h-4 items-center justify-end gap-0.5'>
+        <div className='flex h-5 items-center justify-end gap-0.5'>
           {statusBars.map((rate, index) => (
             <span
               key={`${index}-${rate ?? 'empty'}`}
               className={cn(
-                'w-1 rounded-full',
-                index === 0 && 'h-2',
-                index === 1 && 'h-2.5',
-                index === 2 && 'h-3',
+                'w-1.5 rounded-full',
+                index % 3 === 0 && 'h-3',
+                index % 3 === 1 && 'h-4',
+                index % 3 === 2 && 'h-5',
                 rate == null
-                  ? index === 0
+                  ? index % 3 === 0
                     ? 'bg-muted-foreground/10'
                     : 'bg-muted-foreground/15'
                   : getSuccessRateDotClass(rate)
