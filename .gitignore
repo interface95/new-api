@@ -15,6 +15,7 @@ web/dist
 .env
 one-api
 new-api
+/new-api-*
 /__debug_bin*
 .DS_Store
 tiktoken_cache
@@ -23,6 +24,7 @@ tiktoken_cache
 .gomodcache/
 .cache
 plans
+/devlog/
 .claude
 .cursor
 

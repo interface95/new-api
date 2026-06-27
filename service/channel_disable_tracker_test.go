@@ -51,6 +51,18 @@ func withServiceMiniRedis(t *testing.T) *miniredis.Miniredis {
 	return server
 }
 
+func withAutoDisablePolicy(t *testing.T, enabled bool, threshold int) {
+	t.Helper()
+	oldEnabled := common.AutomaticDisableChannelEnabled
+	oldThreshold := common.AutomaticDisableFailureThreshold
+	common.AutomaticDisableChannelEnabled = enabled
+	common.AutomaticDisableFailureThreshold = threshold
+	t.Cleanup(func() {
+		common.AutomaticDisableChannelEnabled = oldEnabled
+		common.AutomaticDisableFailureThreshold = oldThreshold
+	})
+}
+
 func TestAutoDisableFailureKeyHashesUsingKey(t *testing.T) {
 	key := autoDisableFailureKey(42, "sk-secret-value")
 
@@ -163,6 +175,7 @@ func TestResetChannelFailureClearsRedisCounter(t *testing.T) {
 
 func TestRecordChannelSuccessClearsContinuousFailureCounter(t *testing.T) {
 	withDisabledRedis(t)
+	withAutoDisablePolicy(t, true, 2)
 
 	key := autoDisableFailureKey(12, "sk-success")
 	count, backend := incrChannelFailure(key, time.Minute)
@@ -174,6 +187,31 @@ func TestRecordChannelSuccessClearsContinuousFailureCounter(t *testing.T) {
 	count, backend = incrChannelFailure(key, time.Minute)
 	require.Equal(t, 1, count)
 	require.Equal(t, autoDisableBackendMemory, backend)
+}
+
+func TestRecordChannelSuccessSkipsResetWhenContinuousPolicyInactive(t *testing.T) {
+	server := withServiceMiniRedis(t)
+
+	withAutoDisablePolicy(t, false, 2)
+	key := autoDisableFailureKey(14, "sk-disabled")
+	count, err := common.RedisIncrWithTTL(key, 60)
+	require.NoError(t, err)
+	require.Equal(t, int64(1), count)
+
+	RecordChannelSuccess(14, "sk-disabled")
+
+	require.True(t, server.Exists(key))
+
+	common.AutomaticDisableChannelEnabled = true
+	common.AutomaticDisableFailureThreshold = 1
+	key = autoDisableFailureKey(15, "sk-threshold-one")
+	count, err = common.RedisIncrWithTTL(key, 60)
+	require.NoError(t, err)
+	require.Equal(t, int64(1), count)
+
+	RecordChannelSuccess(15, "sk-threshold-one")
+
+	require.True(t, server.Exists(key))
 }
 
 func TestDisableChannelNowClearsRedisFailureCounter(t *testing.T) {

@@ -36,6 +36,9 @@ func recordChannelAutoDisableFailure(channelError types.ChannelError) autoDisabl
 }
 
 func RecordChannelSuccess(channelId int, usingKey string) {
+	if !common.AutomaticDisableChannelEnabled || common.AutomaticDisableFailureThreshold <= 1 {
+		return
+	}
 	resetChannelFailure(autoDisableFailureKey(channelId, usingKey))
 }
 

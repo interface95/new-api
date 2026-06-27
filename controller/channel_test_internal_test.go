@@ -5,9 +5,12 @@ import (
 	"testing"
 
 	"github.com/QuantumNous/new-api/common"
+	"github.com/QuantumNous/new-api/constant"
 	"github.com/QuantumNous/new-api/dto"
+	"github.com/QuantumNous/new-api/model"
 	"github.com/QuantumNous/new-api/pkg/billingexpr"
 	relaycommon "github.com/QuantumNous/new-api/relay/common"
+	"github.com/QuantumNous/new-api/service"
 	"github.com/QuantumNous/new-api/types"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"
@@ -79,4 +82,19 @@ func TestResolveChannelTestUserIDUsesRequestUser(t *testing.T) {
 
 	require.NoError(t, err)
 	require.Equal(t, 2, userID)
+}
+
+func TestAutomaticChannelTestDoesNotEnableAfterLocalFailure(t *testing.T) {
+	oldEnabled := common.AutomaticEnableChannelEnabled
+	common.AutomaticEnableChannelEnabled = true
+	t.Cleanup(func() {
+		common.AutomaticEnableChannelEnabled = oldEnabled
+	})
+
+	result := testChannel(&model.Channel{Type: constant.ChannelTypeMidjourney}, 1, "", "", false)
+
+	require.Error(t, result.localErr)
+	require.Nil(t, result.newAPIError)
+	require.True(t, service.ShouldEnableChannel(result.newAPIError, common.ChannelStatusAutoDisabled))
+	require.False(t, result.localErr == nil && service.ShouldEnableChannel(result.newAPIError, common.ChannelStatusAutoDisabled))
 }
