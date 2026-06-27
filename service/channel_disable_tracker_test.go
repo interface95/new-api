@@ -6,7 +6,11 @@ import (
 	"time"
 
 	"github.com/QuantumNous/new-api/common"
+	"github.com/QuantumNous/new-api/constant"
+	"github.com/QuantumNous/new-api/model"
 	"github.com/QuantumNous/new-api/types"
+	"github.com/alicebob/miniredis/v2"
+	"github.com/go-redis/redis/v8"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -24,6 +28,27 @@ func withDisabledRedis(t *testing.T) {
 		common.RDB = oldRDB
 		channelAutoDisableFailures = oldTracker
 	})
+}
+
+func withServiceMiniRedis(t *testing.T) *miniredis.Miniredis {
+	t.Helper()
+
+	server, err := miniredis.Run()
+	require.NoError(t, err)
+
+	oldEnabled := common.RedisEnabled
+	oldRDB := common.RDB
+	client := redis.NewClient(&redis.Options{Addr: server.Addr()})
+	common.RedisEnabled = true
+	common.RDB = client
+	t.Cleanup(func() {
+		require.NoError(t, client.Close())
+		common.RDB = oldRDB
+		common.RedisEnabled = oldEnabled
+		server.Close()
+	})
+
+	return server
 }
 
 func TestAutoDisableFailureKeyHashesUsingKey(t *testing.T) {
@@ -79,6 +104,35 @@ func TestIncrChannelFailureUsesMemoryFallbackWhenRedisDisabled(t *testing.T) {
 	require.Equal(t, autoDisableBackendMemory, backend)
 }
 
+func TestIncrChannelFailureUsesRedisWhenAvailable(t *testing.T) {
+	server := withServiceMiniRedis(t)
+
+	key := autoDisableFailureKey(18, "sk-redis")
+	count, backend := incrChannelFailure(key, time.Minute)
+	require.Equal(t, 1, count)
+	require.Equal(t, autoDisableBackendRedis, backend)
+	require.True(t, server.Exists(key))
+
+	count, backend = incrChannelFailure(key, time.Minute)
+	require.Equal(t, 2, count)
+	require.Equal(t, autoDisableBackendRedis, backend)
+	require.Greater(t, server.TTL(key), 55*time.Second)
+}
+
+func TestIncrChannelFailureFallsBackToMemoryWhenRedisFails(t *testing.T) {
+	server := withServiceMiniRedis(t)
+	server.Close()
+
+	key := autoDisableFailureKey(19, "sk-redis-down")
+	count, backend := incrChannelFailure(key, time.Minute)
+	require.Equal(t, 1, count)
+	require.Equal(t, autoDisableBackendMemory, backend)
+
+	count, backend = incrChannelFailure(key, time.Minute)
+	require.Equal(t, 2, count)
+	require.Equal(t, autoDisableBackendMemory, backend)
+}
+
 func TestResetChannelFailureClearsMemoryFallback(t *testing.T) {
 	withDisabledRedis(t)
 
@@ -94,6 +148,19 @@ func TestResetChannelFailureClearsMemoryFallback(t *testing.T) {
 	require.Equal(t, autoDisableBackendMemory, backend)
 }
 
+func TestResetChannelFailureClearsRedisCounter(t *testing.T) {
+	server := withServiceMiniRedis(t)
+
+	key := autoDisableFailureKey(20, "sk-reset-redis")
+	count, backend := incrChannelFailure(key, time.Minute)
+	require.Equal(t, 1, count)
+	require.Equal(t, autoDisableBackendRedis, backend)
+
+	resetChannelFailure(key)
+
+	require.False(t, server.Exists(key))
+}
+
 func TestRecordChannelSuccessClearsContinuousFailureCounter(t *testing.T) {
 	withDisabledRedis(t)
 
@@ -107,6 +174,37 @@ func TestRecordChannelSuccessClearsContinuousFailureCounter(t *testing.T) {
 	count, backend = incrChannelFailure(key, time.Minute)
 	require.Equal(t, 1, count)
 	require.Equal(t, autoDisableBackendMemory, backend)
+}
+
+func TestDisableChannelNowClearsRedisFailureCounter(t *testing.T) {
+	truncate(t)
+	server := withServiceMiniRedis(t)
+	require.NoError(t, model.DB.Exec("DELETE FROM channels").Error)
+	require.NoError(t, model.DB.Exec("DELETE FROM users").Error)
+	require.NoError(t, model.DB.AutoMigrate(&model.Ability{}))
+	require.NoError(t, model.DB.Create(&model.User{
+		Id:       100,
+		Username: "root",
+		Role:     common.RoleRootUser,
+		Status:   common.UserStatusEnabled,
+		AffCode:  "root-reset",
+	}).Error)
+	require.NoError(t, model.DB.Create(&model.Channel{
+		Id:     21,
+		Type:   constant.ChannelTypeOpenAI,
+		Key:    "sk-channel",
+		Status: common.ChannelStatusEnabled,
+		Name:   "redis-reset-channel",
+	}).Error)
+
+	key := autoDisableFailureKey(21, "sk-disable")
+	count, backend := incrChannelFailure(key, time.Minute)
+	require.Equal(t, 1, count)
+	require.Equal(t, autoDisableBackendRedis, backend)
+
+	disableChannelNow(*types.NewChannelError(21, constant.ChannelTypeOpenAI, "redis-reset-channel", false, "sk-disable", true), "test disable")
+
+	require.False(t, server.Exists(key))
 }
 
 func TestRecordChannelAutoDisableFailureUsesConfiguredThreshold(t *testing.T) {
