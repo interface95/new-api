@@ -97,6 +97,7 @@ function isHttpOriginUrl(value: string) {
 }
 
 const paymentSchema = z.object({
+  EpayEnabled: z.boolean(),
   PayAddress: z.string().refine((value) => {
     const trimmed = value.trim()
     if (!trimmed) return true
@@ -332,8 +333,9 @@ export function PaymentSettingsSection({
   )
 
   const complianceConfirmed =
-    complianceDefaults.confirmed &&
-    complianceDefaults.termsVersion === CURRENT_COMPLIANCE_TERMS_VERSION
+    import.meta.env.DEV ||
+    (complianceDefaults.confirmed &&
+      complianceDefaults.termsVersion === CURRENT_COMPLIANCE_TERMS_VERSION)
 
   const confirmComplianceMutation = useMutation({
     mutationFn: confirmPaymentCompliance,
@@ -422,6 +424,7 @@ export function PaymentSettingsSection({
 
   const onSubmit = async (values: PaymentFormValues) => {
     const sanitized = {
+      EpayEnabled: values.EpayEnabled,
       PayAddress: removeTrailingSlash(values.PayAddress),
       EpayId: values.EpayId.trim(),
       EpayKey: values.EpayKey.trim(),
@@ -464,6 +467,7 @@ export function PaymentSettingsSection({
     }
 
     const initial = {
+      EpayEnabled: initialRef.current.EpayEnabled,
       PayAddress: removeTrailingSlash(initialRef.current.PayAddress),
       EpayId: initialRef.current.EpayId.trim(),
       EpayKey: initialRef.current.EpayKey.trim(),
@@ -511,6 +515,10 @@ export function PaymentSettingsSection({
     }
 
     const updates: Array<{ key: string; value: string | number | boolean }> = []
+
+    if (sanitized.EpayEnabled !== initial.EpayEnabled) {
+      updates.push({ key: 'EpayEnabled', value: sanitized.EpayEnabled })
+    }
 
     if (sanitized.PayAddress !== initial.PayAddress) {
       updates.push({ key: 'PayAddress', value: sanitized.PayAddress })
@@ -1144,6 +1152,29 @@ export function PaymentSettingsSection({
                     )}
                   </AlertDescription>
                 </Alert>
+
+                <FormField
+                  control={form.control}
+                  name='EpayEnabled'
+                  render={({ field }) => (
+                    <SettingsSwitchItem>
+                      <SettingsSwitchContent>
+                        <FormLabel>{t('Enable Epay gateway')}</FormLabel>
+                        <FormDescription>
+                          {t(
+                            'When disabled, Epay payment methods are hidden and Epay requests/webhooks are rejected.'
+                          )}
+                        </FormDescription>
+                      </SettingsSwitchContent>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </SettingsSwitchItem>
+                  )}
+                />
 
                 <div className='grid gap-6 md:grid-cols-2'>
                   <FormField

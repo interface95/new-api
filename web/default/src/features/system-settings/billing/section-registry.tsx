@@ -132,6 +132,7 @@ const BILLING_SECTIONS = [
     build: (settings: BillingSettings) => (
       <PaymentSettingsSection
         defaultValues={{
+          EpayEnabled: settings.EpayEnabled ?? false,
           PayAddress: settings.PayAddress,
           EpayId: settings.EpayId,
           EpayKey: settings.EpayKey,
