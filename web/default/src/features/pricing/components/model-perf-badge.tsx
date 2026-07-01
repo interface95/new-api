@@ -19,7 +19,10 @@ For commercial licensing, please contact support@quantumnous.com
 import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
-import { getSuccessRateDotClass } from '@/features/performance-metrics/lib/format'
+import {
+  getSuccessRateDotClass,
+  getSuccessRateTextClass,
+} from '@/features/performance-metrics/lib/format'
 
 export type ModelPerfBadgeData = {
   avg_latency_ms: number
@@ -51,6 +54,11 @@ function formatCompactThroughput(tps: number): string {
   return `${formatCompactNumber(tps)}t`
 }
 
+function formatCompactSuccessRate(rate: number): string {
+  if (!Number.isFinite(rate)) return '—'
+  return `${rate.toFixed(1)}%`
+}
+
 export const ModelPerfBadge = memo(function ModelPerfBadge(
   props: ModelPerfBadgeProps
 ) {
@@ -78,11 +86,12 @@ export const ModelPerfBadge = memo(function ModelPerfBadge(
           ...statusRates,
         ]
       : Array(STATUS_BAR_COUNT).fill(fallbackRate)
+  const successRateLabel = formatCompactSuccessRate(success_rate)
 
   return (
     <div
       className={cn(
-        'hidden w-[214px] grid-cols-[40px_50px_minmax(108px,1fr)] gap-x-2 text-right tabular-nums min-[520px]:grid xl:w-[232px] xl:grid-cols-[42px_54px_minmax(120px,1fr)]',
+        'hidden w-[264px] grid-cols-[40px_50px_minmax(158px,1fr)] gap-x-2 text-right tabular-nums min-[520px]:grid xl:w-[278px] xl:grid-cols-[42px_54px_minmax(166px,1fr)]',
         props.className
       )}
     >
@@ -103,25 +112,32 @@ export const ModelPerfBadge = memo(function ModelPerfBadge(
         </div>
       </div>
       <div
-        title={`${t('Success rate')}: ${success_rate.toFixed(1)}%`}
+        title={`${t('Success rate')}: ${successRateLabel}`}
         className='min-w-0'
       >
         <div className='text-muted-foreground/55 truncate text-[10px] leading-4'>
           {t('Status short')}
         </div>
-        <div className='flex h-5 items-center justify-end gap-0.5'>
-          {statusBars.map((rate, index) => (
-            <span
-              key={`${index}-${rate}`}
-              className={cn(
-                'w-1.5 rounded-full',
-                index % 3 === 0 && 'h-3',
-                index % 3 === 1 && 'h-4',
-                index % 3 === 2 && 'h-5',
-                getSuccessRateDotClass(rate)
-              )}
-            />
-          ))}
+        <div className='flex h-5 items-center justify-end gap-2'>
+          <div className='flex h-4 shrink-0 items-center justify-end gap-0.5'>
+            {statusBars.map((rate, index) => (
+              <span
+                key={`${index}-${rate}`}
+                className={cn(
+                  'h-4 w-1.5 rounded-full',
+                  getSuccessRateDotClass(rate)
+                )}
+              />
+            ))}
+          </div>
+          <div
+            className={cn(
+              'min-w-10 text-right font-mono text-xs leading-4 whitespace-nowrap',
+              getSuccessRateTextClass(success_rate)
+            )}
+          >
+            {successRateLabel}
+          </div>
         </div>
       </div>
     </div>
