@@ -104,54 +104,59 @@ export const ModelPerfBadge = memo(function ModelPerfBadge(
   return (
     <div
       className={cn(
-        'hidden w-[264px] grid-cols-[40px_50px_minmax(158px,1fr)] gap-x-2 text-right tabular-nums min-[520px]:grid xl:w-[278px] xl:grid-cols-[42px_54px_minmax(166px,1fr)]',
+        'hidden w-[264px] flex-col gap-1.5 tabular-nums min-[520px]:flex xl:w-[278px]',
         props.className
       )}
     >
-      <div title={t('Average latency')} className='min-w-0'>
-        <div className='text-muted-foreground/55 text-[10px] leading-4'>
-          {t('Latency short')}
-        </div>
-        <div className='text-muted-foreground/80 font-mono text-xs leading-4 whitespace-nowrap'>
-          {formatCompactLatency(avg_latency_ms)}
-        </div>
-      </div>
-      <div title={t('Throughput')} className='min-w-0'>
-        <div className='text-muted-foreground/55 truncate text-[10px] leading-4'>
-          {t('Throughput short')}
-        </div>
-        <div className='text-muted-foreground/80 font-mono text-xs leading-4 whitespace-nowrap'>
-          {formatCompactThroughput(avg_tps)}
-        </div>
-      </div>
-      <div
-        title={`${t('Success rate')}: ${successRateLabel}`}
-        className='min-w-0'
-      >
-        <div className='text-muted-foreground/55 truncate text-[10px] leading-4'>
-          {statusHeader || t('Status short')}
-        </div>
-        <div className='flex h-5 items-center justify-end gap-2'>
-          <div className='flex h-4 shrink-0 items-center justify-end gap-0.5'>
-            {statusBars.map((rate, index) => (
-              <span
-                key={`${index}-${rate}`}
-                className={cn(
-                  'h-4 w-1.5 rounded-full',
-                  getSuccessRateDotClass(rate)
-                )}
-              />
-            ))}
+      {/* Top: latency + throughput on the left, timestamp + success rate on the
+          right (both on the same baseline), so the long bar can span below. */}
+      <div className='flex items-start justify-between gap-x-3'>
+        <div className='flex gap-x-3'>
+          <div title={t('Average latency')} className='min-w-0'>
+            <div className='text-muted-foreground/55 text-[10px] leading-4'>
+              {t('Latency short')}
+            </div>
+            <div className='text-muted-foreground/80 font-mono text-xs leading-4 whitespace-nowrap'>
+              {formatCompactLatency(avg_latency_ms)}
+            </div>
           </div>
-          <div
+          <div title={t('Throughput')} className='min-w-0'>
+            <div className='text-muted-foreground/55 truncate text-[10px] leading-4'>
+              {t('Throughput short')}
+            </div>
+            <div className='text-muted-foreground/80 font-mono text-xs leading-4 whitespace-nowrap'>
+              {formatCompactThroughput(avg_tps)}
+            </div>
+          </div>
+        </div>
+        <div
+          title={`${t('Success rate')}: ${successRateLabel}`}
+          className='flex min-w-0 items-baseline gap-x-2'
+        >
+          <span className='text-muted-foreground/55 truncate text-[10px] leading-4'>
+            {statusHeader || t('Status short')}
+          </span>
+          <span
             className={cn(
-              'min-w-10 text-right font-mono text-xs leading-4 whitespace-nowrap',
+              'font-mono text-xs leading-4 whitespace-nowrap',
               getSuccessRateTextClass(success_rate)
             )}
           >
             {successRateLabel}
-          </div>
+          </span>
         </div>
+      </div>
+      {/* Bottom: 14-segment bar spanning the full badge width. */}
+      <div className='flex h-4 items-center gap-0.5'>
+        {statusBars.map((rate, index) => (
+          <span
+            key={`${index}-${rate}`}
+            className={cn(
+              'h-4 flex-1 rounded-full',
+              getSuccessRateDotClass(rate)
+            )}
+          />
+        ))}
       </div>
     </div>
   )
