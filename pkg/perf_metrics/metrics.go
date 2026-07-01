@@ -19,6 +19,7 @@ var hotBuckets sync.Map
 // seriesSchema is a stable client cache/schema marker. Do not change it when
 // hiding fields or making response-only privacy hardening changes.
 const seriesSchema = "dbcd0a3c01b55203"
+const summaryRecentBucketLimit = 14
 
 func Init() {
 	go flushLoop()
@@ -187,7 +188,8 @@ func QuerySummaryAll(hours int, groups []string) (SummaryAllResult, error) {
 			AvgLatencyMs:       avgLatency,
 			SuccessRate:        math.Round(successRate*100) / 100,
 			AvgTps:             math.Round(avgTps*100) / 100,
-			RecentSuccessRates: recentSuccessRates(modelBuckets[name], 3),
+			RecentSuccessRates: recentSuccessRates(modelBuckets[name], summaryRecentBucketLimit),
+			LatestBucketTs:     latestBucketTs(modelBuckets[name]),
 			RequestCount:       total.requestCount,
 		})
 	}
@@ -196,6 +198,19 @@ func QuerySummaryAll(hours int, groups []string) (SummaryAllResult, error) {
 	})
 
 	return SummaryAllResult{Models: models}, nil
+}
+
+func latestBucketTs(buckets map[int64]counters) int64 {
+	var latest int64
+	for ts, value := range buckets {
+		if value.requestCount == 0 {
+			continue
+		}
+		if ts > latest {
+			latest = ts
+		}
+	}
+	return latest
 }
 
 func mergeModelTotals(totals map[string]counters, modelName string, value counters) {

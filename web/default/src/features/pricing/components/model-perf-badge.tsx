@@ -29,6 +29,7 @@ export type ModelPerfBadgeData = {
   success_rate: number
   avg_tps: number
   recent_success_rates?: number[]
+  latest_bucket_ts?: number
 }
 
 export interface ModelPerfBadgeProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -59,6 +60,17 @@ function formatCompactSuccessRate(rate: number): string {
   return `${rate.toFixed(1)}%`
 }
 
+function formatBucketTime(ts?: number): string {
+  if (!ts || !Number.isFinite(ts)) return ''
+  const date = new Date(ts * 1000)
+  if (Number.isNaN(date.getTime())) return ''
+
+  const pad = (value: number) => String(value).padStart(2, '0')
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
+    date.getDate()
+  )} ${pad(date.getHours())}:${pad(date.getMinutes())}`
+}
+
 export const ModelPerfBadge = memo(function ModelPerfBadge(
   props: ModelPerfBadgeProps
 ) {
@@ -87,6 +99,7 @@ export const ModelPerfBadge = memo(function ModelPerfBadge(
         ]
       : Array(STATUS_BAR_COUNT).fill(fallbackRate)
   const successRateLabel = formatCompactSuccessRate(success_rate)
+  const statusHeader = formatBucketTime(props.perf.latest_bucket_ts)
 
   return (
     <div
@@ -116,7 +129,7 @@ export const ModelPerfBadge = memo(function ModelPerfBadge(
         className='min-w-0'
       >
         <div className='text-muted-foreground/55 truncate text-[10px] leading-4'>
-          {t('Status short')}
+          {statusHeader || t('Status short')}
         </div>
         <div className='flex h-5 items-center justify-end gap-2'>
           <div className='flex h-4 shrink-0 items-center justify-end gap-0.5'>
