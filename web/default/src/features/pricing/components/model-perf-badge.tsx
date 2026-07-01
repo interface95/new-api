@@ -65,14 +65,19 @@ export const ModelPerfBadge = memo(function ModelPerfBadge(
   const recentRates =
     props.perf.recent_success_rates?.filter((rate) => Number.isFinite(rate)) ??
     []
+  const fallbackRate = Number.isFinite(success_rate) ? success_rate : 0
   const statusRates =
-    recentRates.length > 0
-      ? recentRates.slice(-STATUS_BAR_COUNT)
-      : Array(STATUS_BAR_COUNT).fill(success_rate)
-  const statusBars = [
-    ...Array(Math.max(0, STATUS_BAR_COUNT - statusRates.length)).fill(null),
-    ...statusRates,
-  ].slice(-STATUS_BAR_COUNT)
+    recentRates.length > 0 ? recentRates.slice(-STATUS_BAR_COUNT) : []
+  const leadingRate = statusRates[0] ?? fallbackRate
+  const statusBars =
+    statusRates.length > 0
+      ? [
+          ...Array(Math.max(0, STATUS_BAR_COUNT - statusRates.length)).fill(
+            leadingRate
+          ),
+          ...statusRates,
+        ]
+      : Array(STATUS_BAR_COUNT).fill(fallbackRate)
 
   return (
     <div
@@ -107,17 +112,13 @@ export const ModelPerfBadge = memo(function ModelPerfBadge(
         <div className='flex h-5 items-center justify-end gap-0.5'>
           {statusBars.map((rate, index) => (
             <span
-              key={`${index}-${rate ?? 'empty'}`}
+              key={`${index}-${rate}`}
               className={cn(
                 'w-1.5 rounded-full',
                 index % 3 === 0 && 'h-3',
                 index % 3 === 1 && 'h-4',
                 index % 3 === 2 && 'h-5',
-                rate == null
-                  ? index % 3 === 0
-                    ? 'bg-muted-foreground/10'
-                    : 'bg-muted-foreground/15'
-                  : getSuccessRateDotClass(rate)
+                getSuccessRateDotClass(rate)
               )}
             />
           ))}
