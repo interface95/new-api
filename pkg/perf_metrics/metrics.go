@@ -19,7 +19,7 @@ var hotBuckets sync.Map
 // seriesSchema is a stable client cache/schema marker. Do not change it when
 // hiding fields or making response-only privacy hardening changes.
 const seriesSchema = "dbcd0a3c01b55203"
-const summaryRecentBucketLimit = 14
+const summaryRecentBucketLimit = 24
 
 func Init() {
 	go flushLoop()
@@ -189,6 +189,7 @@ func QuerySummaryAll(hours int, groups []string) (SummaryAllResult, error) {
 			SuccessRate:        math.Round(successRate*100) / 100,
 			AvgTps:             math.Round(avgTps*100) / 100,
 			RecentSuccessRates: recentSuccessRates(modelBuckets[name], summaryRecentBucketLimit),
+			RecentBucketTs:     recentBucketTimestamps(modelBuckets[name], summaryRecentBucketLimit),
 			LatestBucketTs:     latestBucketTs(modelBuckets[name]),
 			RequestCount:       total.requestCount,
 		})
@@ -265,6 +266,26 @@ func recentSuccessRates(buckets map[int64]counters, limit int) []float64 {
 		rates = append(rates, math.Round(successRate(buckets[ts])*100)/100)
 	}
 	return rates
+}
+
+// recentBucketTimestamps returns the timestamps of the most recent buckets, in
+// the same order (oldest->newest) as recentSuccessRates, so the frontend can zip
+// each status-bar segment to its bucket time for hover tooltips.
+func recentBucketTimestamps(buckets map[int64]counters, limit int) []int64 {
+	if len(buckets) == 0 || limit <= 0 {
+		return nil
+	}
+	timestamps := make([]int64, 0, len(buckets))
+	for ts := range buckets {
+		timestamps = append(timestamps, ts)
+	}
+	sort.Slice(timestamps, func(i, j int) bool {
+		return timestamps[i] < timestamps[j]
+	})
+	if len(timestamps) > limit {
+		timestamps = timestamps[len(timestamps)-limit:]
+	}
+	return timestamps
 }
 
 func allowedGroupSet(groups []string) map[string]struct{} {

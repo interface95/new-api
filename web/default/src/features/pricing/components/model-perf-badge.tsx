@@ -29,14 +29,18 @@ export type ModelPerfBadgeData = {
   success_rate: number
   avg_tps: number
   recent_success_rates?: number[]
+  recent_bucket_ts?: number[]
   latest_bucket_ts?: number
 }
 
-export interface ModelPerfBadgeProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface ModelPerfBadgeProps
+  extends React.HTMLAttributes<HTMLDivElement> {
   perf: ModelPerfBadgeData | undefined
 }
 
-const STATUS_BAR_COUNT = 14
+const STATUS_BAR_COUNT = 24
+
+type StatusBar = { rate: number; ts?: number }
 
 function formatCompactNumber(value: number): string {
   if (!Number.isFinite(value) || value <= 0) return '—'
@@ -71,6 +75,31 @@ function formatBucketTime(ts?: number): string {
   )} ${pad(date.getHours())}:${pad(date.getMinutes())}`
 }
 
+// Builds the fixed-length segment list, zipping each recent success rate to its
+// bucket timestamp (for hover) and front-padding with the leading rate when
+// fewer than STATUS_BAR_COUNT real buckets exist. Padding segments carry no ts.
+function buildStatusBars(
+  recentRates: number[],
+  recentTs: number[],
+  fallbackRate: number
+): StatusBar[] {
+  const rates = recentRates.slice(-STATUS_BAR_COUNT)
+  if (rates.length === 0) {
+    return Array.from({ length: STATUS_BAR_COUNT }, (): StatusBar => ({
+      rate: fallbackRate,
+    }))
+  }
+  const timestamps = recentTs.slice(-STATUS_BAR_COUNT)
+  const leadingRate = rates[0] ?? fallbackRate
+  const padCount = Math.max(0, STATUS_BAR_COUNT - rates.length)
+  return [
+    ...Array.from({ length: padCount }, (): StatusBar => ({
+      rate: leadingRate,
+    })),
+    ...rates.map((rate, i): StatusBar => ({ rate, ts: timestamps[i] })),
+  ]
+}
+
 export const ModelPerfBadge = memo(function ModelPerfBadge(
   props: ModelPerfBadgeProps
 ) {
@@ -86,18 +115,11 @@ export const ModelPerfBadge = memo(function ModelPerfBadge(
     props.perf.recent_success_rates?.filter((rate) => Number.isFinite(rate)) ??
     []
   const fallbackRate = Number.isFinite(success_rate) ? success_rate : 0
-  const statusRates =
-    recentRates.length > 0 ? recentRates.slice(-STATUS_BAR_COUNT) : []
-  const leadingRate = statusRates[0] ?? fallbackRate
-  const statusBars =
-    statusRates.length > 0
-      ? [
-          ...Array(Math.max(0, STATUS_BAR_COUNT - statusRates.length)).fill(
-            leadingRate
-          ),
-          ...statusRates,
-        ]
-      : Array(STATUS_BAR_COUNT).fill(fallbackRate)
+  const statusBars = buildStatusBars(
+    recentRates,
+    props.perf.recent_bucket_ts ?? [],
+    fallbackRate
+  )
   const successRateLabel = formatCompactSuccessRate(success_rate)
   const statusHeader = formatBucketTime(props.perf.latest_bucket_ts)
 
@@ -146,14 +168,16 @@ export const ModelPerfBadge = memo(function ModelPerfBadge(
           </span>
         </div>
       </div>
-      {/* Bottom: 14-segment bar spanning the full badge width. */}
+      {/* Bottom: thin 24-segment bar spanning the full badge width; each segment
+          shows its bucket time on hover. */}
       <div className='flex h-4 items-center gap-0.5'>
-        {statusBars.map((rate, index) => (
+        {statusBars.map((bar, index) => (
           <span
-            key={`${index}-${rate}`}
+            key={`${index}-${bar.rate}`}
+            title={bar.ts ? formatBucketTime(bar.ts) : undefined}
             className={cn(
               'h-4 flex-1 rounded-full',
-              getSuccessRateDotClass(rate)
+              getSuccessRateDotClass(bar.rate)
             )}
           />
         ))}
