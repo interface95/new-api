@@ -26,6 +26,7 @@ import { isTagAggregateRow, parseGroupsList } from '../lib'
 import type { Channel } from '../types'
 import { ChannelRowActionsLayoutContext } from './channel-row-actions-context'
 import { useChannels } from './channels-provider'
+import { ChannelPerfBadge } from './channel-perf-badge'
 
 const SENSITIVE_MASK = '••••'
 
@@ -139,6 +140,23 @@ function ChannelCardComponent({ row }: { row: Row<Channel> }) {
           </div>
         </div>
       </div>
+
+      {/* Success-rate status bar (real traffic, channel-side errors only).
+          Hidden for tag aggregate rows and when the channel has no metrics. */}
+      {!isTagRow &&
+        row.original.recent_success_rates &&
+        row.original.recent_success_rates.length > 0 && (
+          <ChannelPerfBadge
+            perf={{
+              // No aggregate rate (nil) -> NaN so the badge shows '—' (unknown)
+              // rather than a fake red 0%; segment bars use recent_success_rates.
+              success_rate: row.original.success_rate ?? NaN,
+              recent_success_rates:
+                row.original.recent_success_rates ?? undefined,
+              latest_bucket_ts: row.original.latest_bucket_ts ?? undefined,
+            }}
+          />
+        )}
 
       {/* Last row: groups span the full width, showing every group (no label) */}
       <div className='min-w-0'>

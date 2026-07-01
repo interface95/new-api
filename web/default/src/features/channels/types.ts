@@ -71,6 +71,9 @@ export const channelSchema = z.object({
     multi_key_mode: 'random',
   }),
   settings: z.string().default('{}'), // other_settings JSON
+  success_rate: z.number().nullish(),
+  recent_success_rates: z.array(z.number()).nullish(),
+  latest_bucket_ts: z.number().nullish(),
 })
 
 export type Channel = z.infer<typeof channelSchema>

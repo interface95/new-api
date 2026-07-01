@@ -322,6 +322,10 @@ export type OperationsSettings = {
   'perf_metrics_setting.flush_interval': number
   'perf_metrics_setting.bucket_time': 'hour' | 'minute' | '5min'
   'perf_metrics_setting.retention_days': number
+  'channel_metrics_setting.enabled': boolean
+  'channel_metrics_setting.flush_interval': number
+  'channel_metrics_setting.bucket_time': 'hour' | 'minute' | '5min'
+  'channel_metrics_setting.retention_days': number
 }
 
 export type SecuritySettings = {

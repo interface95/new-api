@@ -19,6 +19,7 @@ For commercial licensing, please contact support@quantumnous.com
 import { SystemBehaviorSection } from '../general/system-behavior-section'
 import { EmailSettingsSection } from '../integrations/email-settings-section'
 import { MonitoringSettingsSection } from '../integrations/monitoring-settings-section'
+import { ChannelMetricsSettingsSection } from '../integrations/channel-metrics-settings-section'
 import { WorkerSettingsSection } from '../integrations/worker-settings-section'
 import { LogSettingsSection } from '../maintenance/log-settings-section'
 import { PerformanceSection } from '../maintenance/performance-section'
@@ -55,6 +56,24 @@ const OPERATIONS_SECTIONS = [
             settings['perf_metrics_setting.bucket_time'] ?? 'hour',
           'perf_metrics_setting.retention_days':
             settings['perf_metrics_setting.retention_days'] ?? 0,
+        }}
+      />
+    ),
+  },
+  {
+    id: 'channel-metrics',
+    titleKey: 'Channel performance metrics',
+    build: (settings: OperationsSettings) => (
+      <ChannelMetricsSettingsSection
+        defaultValues={{
+          'channel_metrics_setting.enabled':
+            settings['channel_metrics_setting.enabled'] ?? true,
+          'channel_metrics_setting.flush_interval':
+            settings['channel_metrics_setting.flush_interval'] ?? 5,
+          'channel_metrics_setting.bucket_time':
+            settings['channel_metrics_setting.bucket_time'] ?? 'hour',
+          'channel_metrics_setting.retention_days':
+            settings['channel_metrics_setting.retention_days'] ?? 0,
         }}
       />
     ),
