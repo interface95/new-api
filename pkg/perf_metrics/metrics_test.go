@@ -51,3 +51,19 @@ func TestRecentBucketTimestampsAlignWithRates(t *testing.T) {
 		assert.Equal(t, float64(ts[i]), rates[i])
 	}
 }
+
+func TestRecentSuccessAndFailureCountsAlignWithRates(t *testing.T) {
+	buckets := map[int64]counters{
+		100: {requestCount: 3, successCount: 1},
+		200: {requestCount: 4, successCount: 4},
+	}
+
+	rates := recentSuccessRates(buckets, summaryRecentBucketLimit)
+	successCounts := recentSuccessCounts(buckets, summaryRecentBucketLimit)
+	failureCounts := recentFailureCounts(buckets, summaryRecentBucketLimit)
+
+	require.Len(t, successCounts, len(rates))
+	require.Len(t, failureCounts, len(rates))
+	assert.Equal(t, []int64{1, 4}, successCounts)
+	assert.Equal(t, []int64{2, 0}, failureCounts)
+}

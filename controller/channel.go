@@ -13,6 +13,7 @@ import (
 	"github.com/QuantumNous/new-api/constant"
 	"github.com/QuantumNous/new-api/i18n"
 	"github.com/QuantumNous/new-api/model"
+	channelmetrics "github.com/QuantumNous/new-api/pkg/channel_metrics"
 	relaychannel "github.com/QuantumNous/new-api/relay/channel"
 	"github.com/QuantumNous/new-api/relay/channel/ollama"
 	relaycommon "github.com/QuantumNous/new-api/relay/common"
@@ -91,6 +92,34 @@ func buildChannelListQuery(group string, statusFilter int, typeFilter int) *gorm
 	return query
 }
 
+func attachChannelPerf(channels []*model.Channel, channelIds []int) {
+	if len(channelIds) == 0 {
+		return
+	}
+	summaries, err := channelmetrics.QueryChannelSummary(channelIds, 24)
+	if err != nil {
+		common.SysError("failed to query channel perf summary: " + err.Error())
+		return
+	}
+	for _, ch := range channels {
+		if ch == nil {
+			continue
+		}
+		summary, ok := summaries[ch.Id]
+		if !ok {
+			continue
+		}
+		rate := summary.SuccessRate
+		ch.SuccessRate = &rate
+		ch.RecentSuccessRates = summary.RecentSuccessRates
+		ch.RecentBucketTs = summary.RecentBucketTs
+		ch.RecentSuccessCounts = summary.RecentSuccessCounts
+		ch.RecentFailureCounts = summary.RecentFailureCounts
+		ch.LatestBucketTs = summary.LatestBucketTs
+		ch.MetricBucketSeconds = summary.BucketSeconds
+	}
+}
+
 func GetChannelOps(c *gin.Context) {
 	common.ApiSuccess(c, gin.H{
 		"retry_times": common.RetryTimes,
@@ -165,9 +194,12 @@ func GetAllChannels(c *gin.Context) {
 		}
 	}
 
+	channelIds := make([]int, 0, len(channelData))
 	for _, datum := range channelData {
 		clearChannelInfo(datum)
+		channelIds = append(channelIds, datum.Id)
 	}
+	attachChannelPerf(channelData, channelIds)
 
 	countQuery := buildChannelListQuery(groupFilter, statusFilter, -1)
 	var results []struct {
@@ -378,9 +410,12 @@ func SearchChannels(c *gin.Context) {
 
 	pagedData := channelData[startIdx:endIdx]
 
+	channelIds := make([]int, 0, len(pagedData))
 	for _, datum := range pagedData {
 		clearChannelInfo(datum)
+		channelIds = append(channelIds, datum.Id)
 	}
+	attachChannelPerf(pagedData, channelIds)
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,

@@ -97,26 +97,41 @@ func TestChannelHasSensitiveChanges(t *testing.T) {
 }
 
 func TestClearChannelReadOnlyFields(t *testing.T) {
+	successRate := 0.95
 	channel := PatchChannel{Channel: model.Channel{
-		CreatedTime:        11,
-		TestTime:           22,
-		ResponseTime:       33,
-		Balance:            44.5,
-		BalanceUpdatedTime: 55,
-		UsedQuota:          66,
-		Models:             "gpt-4o",
-		Group:              "default",
+		CreatedTime:         11,
+		TestTime:            22,
+		ResponseTime:        33,
+		Balance:             44.5,
+		BalanceUpdatedTime:  55,
+		UsedQuota:           66,
+		Models:              "gpt-4o",
+		Group:               "default",
+		SuccessRate:         &successRate,
+		RecentSuccessRates:  []float64{0.9},
+		RecentBucketTs:      []int64{100},
+		RecentSuccessCounts: []int64{9},
+		RecentFailureCounts: []int64{1},
+		LatestBucketTs:      100,
+		MetricBucketSeconds: 60,
 	}}
 
 	clearChannelReadOnlyFields(&channel, map[string]any{
-		"created_time":         channel.CreatedTime,
-		"test_time":            channel.TestTime,
-		"response_time":        channel.ResponseTime,
-		"balance":              channel.Balance,
-		"balance_updated_time": channel.BalanceUpdatedTime,
-		"used_quota":           channel.UsedQuota,
-		"models":               channel.Models,
-		"group":                channel.Group,
+		"created_time":          channel.CreatedTime,
+		"test_time":             channel.TestTime,
+		"response_time":         channel.ResponseTime,
+		"balance":               channel.Balance,
+		"balance_updated_time":  channel.BalanceUpdatedTime,
+		"used_quota":            channel.UsedQuota,
+		"success_rate":          channel.SuccessRate,
+		"recent_success_rates":  channel.RecentSuccessRates,
+		"recent_bucket_ts":      channel.RecentBucketTs,
+		"recent_success_counts": channel.RecentSuccessCounts,
+		"recent_failure_counts": channel.RecentFailureCounts,
+		"latest_bucket_ts":      channel.LatestBucketTs,
+		"metric_bucket_seconds": channel.MetricBucketSeconds,
+		"models":                channel.Models,
+		"group":                 channel.Group,
 	})
 
 	assert.Zero(t, channel.CreatedTime)
@@ -125,6 +140,13 @@ func TestClearChannelReadOnlyFields(t *testing.T) {
 	assert.Zero(t, channel.Balance)
 	assert.Zero(t, channel.BalanceUpdatedTime)
 	assert.Zero(t, channel.UsedQuota)
+	assert.Nil(t, channel.SuccessRate)
+	assert.Nil(t, channel.RecentSuccessRates)
+	assert.Nil(t, channel.RecentBucketTs)
+	assert.Nil(t, channel.RecentSuccessCounts)
+	assert.Nil(t, channel.RecentFailureCounts)
+	assert.Zero(t, channel.LatestBucketTs)
+	assert.Zero(t, channel.MetricBucketSeconds)
 	assert.Equal(t, "gpt-4o", channel.Models)
 	assert.Equal(t, "default", channel.Group)
 }

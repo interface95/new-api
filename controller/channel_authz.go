@@ -82,12 +82,19 @@ var channelOperationalFields = map[string]struct{}{
 // channelReadOnlyFields lists server-managed/accounting fields that the general
 // channel edit endpoint must ignore even if a client sends them.
 var channelReadOnlyFields = map[string]struct{}{
-	"created_time":         {},
-	"test_time":            {},
-	"response_time":        {},
-	"balance":              {},
-	"balance_updated_time": {},
-	"used_quota":           {},
+	"created_time":          {},
+	"test_time":             {},
+	"response_time":         {},
+	"balance":               {},
+	"balance_updated_time":  {},
+	"used_quota":            {},
+	"success_rate":          {},
+	"recent_success_rates":  {},
+	"recent_bucket_ts":      {},
+	"recent_success_counts": {},
+	"recent_failure_counts": {},
+	"latest_bucket_ts":      {},
+	"metric_bucket_seconds": {},
 }
 
 func clearChannelReadOnlyFields(channel *PatchChannel, requestData map[string]any) {
@@ -108,6 +115,27 @@ func clearChannelReadOnlyFields(channel *PatchChannel, requestData map[string]an
 	}
 	if _, ok := requestData["used_quota"]; ok {
 		channel.UsedQuota = 0
+	}
+	if _, ok := requestData["success_rate"]; ok {
+		channel.SuccessRate = nil
+	}
+	if _, ok := requestData["recent_success_rates"]; ok {
+		channel.RecentSuccessRates = nil
+	}
+	if _, ok := requestData["recent_bucket_ts"]; ok {
+		channel.RecentBucketTs = nil
+	}
+	if _, ok := requestData["recent_success_counts"]; ok {
+		channel.RecentSuccessCounts = nil
+	}
+	if _, ok := requestData["recent_failure_counts"]; ok {
+		channel.RecentFailureCounts = nil
+	}
+	if _, ok := requestData["latest_bucket_ts"]; ok {
+		channel.LatestBucketTs = 0
+	}
+	if _, ok := requestData["metric_bucket_seconds"]; ok {
+		channel.MetricBucketSeconds = 0
 	}
 }
 

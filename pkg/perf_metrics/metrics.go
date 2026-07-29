@@ -184,14 +184,17 @@ func QuerySummaryAll(hours int, groups []string) (SummaryAllResult, error) {
 			avgTps = float64(total.outputTokens) / (float64(total.generationMs) / 1000.0)
 		}
 		models = append(models, ModelSummary{
-			ModelName:          name,
-			AvgLatencyMs:       avgLatency,
-			SuccessRate:        math.Round(successRate*100) / 100,
-			AvgTps:             math.Round(avgTps*100) / 100,
-			RecentSuccessRates: recentSuccessRates(modelBuckets[name], summaryRecentBucketLimit),
-			RecentBucketTs:     recentBucketTimestamps(modelBuckets[name], summaryRecentBucketLimit),
-			LatestBucketTs:     latestBucketTs(modelBuckets[name]),
-			RequestCount:       total.requestCount,
+			ModelName:           name,
+			AvgLatencyMs:        avgLatency,
+			SuccessRate:         math.Round(successRate*100) / 100,
+			AvgTps:              math.Round(avgTps*100) / 100,
+			RecentSuccessRates:  recentSuccessRates(modelBuckets[name], summaryRecentBucketLimit),
+			RecentBucketTs:      recentBucketTimestamps(modelBuckets[name], summaryRecentBucketLimit),
+			RecentSuccessCounts: recentSuccessCounts(modelBuckets[name], summaryRecentBucketLimit),
+			RecentFailureCounts: recentFailureCounts(modelBuckets[name], summaryRecentBucketLimit),
+			LatestBucketTs:      latestBucketTs(modelBuckets[name]),
+			MetricBucketSeconds: perf_metrics_setting.GetBucketSeconds(),
+			RequestCount:        total.requestCount,
 		})
 	}
 	sort.Slice(models, func(i, j int) bool {
@@ -286,6 +289,35 @@ func recentBucketTimestamps(buckets map[int64]counters, limit int) []int64 {
 		timestamps = timestamps[len(timestamps)-limit:]
 	}
 	return timestamps
+}
+
+func recentSuccessCounts(buckets map[int64]counters, limit int) []int64 {
+	timestamps := recentBucketTimestamps(buckets, limit)
+	if len(timestamps) == 0 {
+		return nil
+	}
+	counts := make([]int64, 0, len(timestamps))
+	for _, ts := range timestamps {
+		counts = append(counts, buckets[ts].successCount)
+	}
+	return counts
+}
+
+func recentFailureCounts(buckets map[int64]counters, limit int) []int64 {
+	timestamps := recentBucketTimestamps(buckets, limit)
+	if len(timestamps) == 0 {
+		return nil
+	}
+	counts := make([]int64, 0, len(timestamps))
+	for _, ts := range timestamps {
+		value := buckets[ts]
+		failed := value.requestCount - value.successCount
+		if failed < 0 {
+			failed = 0
+		}
+		counts = append(counts, failed)
+	}
+	return counts
 }
 
 func allowedGroupSet(groups []string) map[string]struct{} {

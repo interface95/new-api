@@ -15,6 +15,7 @@ import (
 	"github.com/QuantumNous/new-api/logger"
 	"github.com/QuantumNous/new-api/middleware"
 	"github.com/QuantumNous/new-api/model"
+	channelmetrics "github.com/QuantumNous/new-api/pkg/channel_metrics"
 	perfmetrics "github.com/QuantumNous/new-api/pkg/perf_metrics"
 	"github.com/QuantumNous/new-api/relay"
 	relaycommon "github.com/QuantumNous/new-api/relay/common"
@@ -212,6 +213,7 @@ func Relay(c *gin.Context, relayFormat types.RelayFormat) {
 			break
 		}
 		c.Request.Body = io.NopCloser(bodyStorage)
+		attemptStart := time.Now()
 
 		switch relayFormat {
 		case types.RelayFormatOpenAIRealtime:
@@ -228,6 +230,11 @@ func Relay(c *gin.Context, relayFormat types.RelayFormat) {
 			relayInfo.LastError = nil
 			usingKey := common.GetContextKeyString(c, constant.ContextKeyChannelKey)
 			service.RecordChannelSuccess(channel.Id, usingKey)
+			chID := channel.Id
+			attemptMs := time.Since(attemptStart).Milliseconds()
+			gopool.Go(func() {
+				channelmetrics.RecordChannelSample(chID, true, attemptMs)
+			})
 			return
 		}
 
@@ -235,6 +242,13 @@ func Relay(c *gin.Context, relayFormat types.RelayFormat) {
 		relayInfo.LastError = newAPIError
 
 		processChannelError(c, *types.NewChannelError(channel.Id, channel.Type, channel.Name, channel.ChannelInfo.IsMultiKey, common.GetContextKeyString(c, constant.ContextKeyChannelKey), channel.GetAutoBan()), newAPIError)
+
+		if isChannelSideError(newAPIError) {
+			chID := channel.Id
+			gopool.Go(func() {
+				channelmetrics.RecordChannelSample(chID, false, 0)
+			})
+		}
 
 		if !shouldRetry(c, newAPIError, common.RetryTimes-retryParam.GetRetry()) {
 			break
@@ -355,6 +369,32 @@ func shouldRetry(c *gin.Context, openaiErr *types.NewAPIError, retryTimes int) b
 	}
 	if operation_setting.IsAlwaysSkipRetryCode(openaiErr.GetErrorCode()) {
 		return false
+	}
+	return operation_setting.ShouldRetryByStatusCode(code)
+}
+
+// isChannelSideError reports whether an upstream error should count against a
+// channel's success rate. It intentionally ignores retry-budget and selected-channel
+// constraints so the failing attempt is counted even when no retry remains.
+func isChannelSideError(err *types.NewAPIError) bool {
+	if err == nil {
+		return false
+	}
+	if types.IsChannelError(err) {
+		return true
+	}
+	if types.IsSkipRetryError(err) {
+		return false
+	}
+	if operation_setting.IsAlwaysSkipRetryCode(err.GetErrorCode()) {
+		return false
+	}
+	code := err.StatusCode
+	if code >= 200 && code < 300 {
+		return false
+	}
+	if code < 100 || code > 599 {
+		return true
 	}
 	return operation_setting.ShouldRetryByStatusCode(code)
 }
@@ -548,20 +588,32 @@ func RelayTask(c *gin.Context) {
 			break
 		}
 		c.Request.Body = io.NopCloser(bodyStorage)
+		attemptStart := time.Now()
 
 		result, taskErr = relay.RelayTaskSubmit(c, relayInfo)
 		if taskErr == nil {
 			channelId := channel.Id
 			usingKey := common.GetContextKeyString(c, constant.ContextKeyChannelKey)
 			service.RecordChannelSuccess(channelId, usingKey)
+			attemptMs := time.Since(attemptStart).Milliseconds()
+			gopool.Go(func() {
+				channelmetrics.RecordChannelSample(channelId, true, attemptMs)
+			})
 			break
 		}
 
 		if !taskErr.LocalError {
+			taskAPIError := types.NewOpenAIError(taskErr.Error, types.ErrorCodeBadResponseStatusCode, taskErr.StatusCode)
 			processChannelError(c,
 				*types.NewChannelError(channel.Id, channel.Type, channel.Name, channel.ChannelInfo.IsMultiKey,
 					common.GetContextKeyString(c, constant.ContextKeyChannelKey), channel.GetAutoBan()),
-				types.NewOpenAIError(taskErr.Error, types.ErrorCodeBadResponseStatusCode, taskErr.StatusCode))
+				taskAPIError)
+			if isChannelSideError(taskAPIError) {
+				chID := channel.Id
+				gopool.Go(func() {
+					channelmetrics.RecordChannelSample(chID, false, 0)
+				})
+			}
 		}
 
 		if !shouldRetryTaskRelay(c, channel.Id, taskErr, common.RetryTimes-retryParam.GetRetry()) {

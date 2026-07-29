@@ -48,14 +48,17 @@ type QueryResult struct {
 }
 
 type ModelSummary struct {
-	ModelName          string    `json:"model_name"`
-	AvgLatencyMs       int64     `json:"avg_latency_ms"`
-	SuccessRate        float64   `json:"success_rate"`
-	AvgTps             float64   `json:"avg_tps"`
-	RecentSuccessRates []float64 `json:"recent_success_rates,omitempty"`
-	RecentBucketTs     []int64   `json:"recent_bucket_ts,omitempty"`
-	LatestBucketTs     int64     `json:"latest_bucket_ts,omitempty"`
-	RequestCount       int64     `json:"-"`
+	ModelName           string    `json:"model_name"`
+	AvgLatencyMs        int64     `json:"avg_latency_ms"`
+	SuccessRate         float64   `json:"success_rate"`
+	AvgTps              float64   `json:"avg_tps"`
+	RecentSuccessRates  []float64 `json:"recent_success_rates,omitempty"`
+	RecentBucketTs      []int64   `json:"recent_bucket_ts,omitempty"`
+	RecentSuccessCounts []int64   `json:"recent_success_counts,omitempty"`
+	RecentFailureCounts []int64   `json:"recent_failure_counts,omitempty"`
+	LatestBucketTs      int64     `json:"latest_bucket_ts,omitempty"`
+	MetricBucketSeconds int64     `json:"metric_bucket_seconds,omitempty"`
+	RequestCount        int64     `json:"-"`
 }
 
 type SummaryAllResult struct {

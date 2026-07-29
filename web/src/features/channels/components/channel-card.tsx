@@ -162,10 +162,19 @@ function ChannelCardComponent({
           row.original.recent_success_rates.length > 0 && (
             <ChannelPerfBadge
               perf={{
+                // No aggregate rate (nil) -> NaN so the badge shows an unknown
+                // value instead of a false red 0%.
                 success_rate: row.original.success_rate ?? Number.NaN,
                 recent_success_rates:
                   row.original.recent_success_rates ?? undefined,
+                recent_bucket_ts: row.original.recent_bucket_ts ?? undefined,
+                recent_success_counts:
+                  row.original.recent_success_counts ?? undefined,
+                recent_failure_counts:
+                  row.original.recent_failure_counts ?? undefined,
                 latest_bucket_ts: row.original.latest_bucket_ts ?? undefined,
+                metric_bucket_seconds:
+                  row.original.metric_bucket_seconds ?? undefined,
               }}
             />
           )}
