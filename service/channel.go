@@ -5,10 +5,10 @@ import (
 	"strings"
 
 	"github.com/QuantumNous/new-api/common"
-	"github.com/QuantumNous/new-api/dto"
 	"github.com/QuantumNous/new-api/model"
+	"github.com/QuantumNous/new-api/relaykit/dto"
+	"github.com/QuantumNous/new-api/relaykit/types"
 	"github.com/QuantumNous/new-api/setting/operation_setting"
-	"github.com/QuantumNous/new-api/types"
 )
 
 func formatNotifyType(channelId int, status int) string {
@@ -51,13 +51,13 @@ func DisableChannelImmediately(channelError types.ChannelError, reason string) {
 }
 
 // disable & notify
-func DisableChannel(channelError types.ChannelError, reason string) {
+func DisableChannel(channelError types.ChannelError, reason string) bool {
 	common.SysLog(fmt.Sprintf("通道「%s」（#%d）发生错误，进入自动禁用检查，原因：%s", channelError.ChannelName, channelError.ChannelId, common.LocalLogPreview(reason)))
 
 	// 检查是否启用自动禁用功能
 	if !channelError.AutoBan {
 		common.SysLog(fmt.Sprintf("通道「%s」（#%d）未启用自动禁用功能，跳过禁用操作", channelError.ChannelName, channelError.ChannelId))
-		return
+		return false
 	}
 
 	decision := recordChannelAutoDisableFailure(channelError)
@@ -72,7 +72,7 @@ func DisableChannel(channelError types.ChannelError, reason string) {
 			decision.Window.Seconds(),
 			common.LocalLogPreview(reason),
 		))
-		return
+		return false
 	}
 
 	reason = fmt.Sprintf(
@@ -83,10 +83,10 @@ func DisableChannel(channelError types.ChannelError, reason string) {
 		decision.Window.Seconds(),
 		reason,
 	)
-	disableChannelNow(channelError, reason)
+	return disableChannelNow(channelError, reason)
 }
 
-func disableChannelNow(channelError types.ChannelError, reason string) {
+func disableChannelNow(channelError types.ChannelError, reason string) bool {
 	success := model.UpdateChannelStatus(channelError.ChannelId, channelError.UsingKey, common.ChannelStatusAutoDisabled, reason)
 	if success {
 		resetChannelFailure(autoDisableFailureKey(channelError.ChannelId, channelError.UsingKey))
@@ -94,6 +94,7 @@ func disableChannelNow(channelError types.ChannelError, reason string) {
 		content := fmt.Sprintf("通道「%s」（#%d）已被禁用，原因：%s", channelError.ChannelName, channelError.ChannelId, reason)
 		NotifyRootUser(formatNotifyType(channelError.ChannelId, common.ChannelStatusAutoDisabled), subject, content)
 	}
+	return success
 }
 
 func EnableChannel(channelId int, usingKey string, channelName string) {

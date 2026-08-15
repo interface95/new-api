@@ -8,7 +8,7 @@ import (
 	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/constant"
 	"github.com/QuantumNous/new-api/model"
-	"github.com/QuantumNous/new-api/types"
+	"github.com/QuantumNous/new-api/relaykit/types"
 	"github.com/alicebob/miniredis/v2"
 	"github.com/go-redis/redis/v8"
 	"github.com/stretchr/testify/assert"
@@ -240,9 +240,33 @@ func TestDisableChannelNowClearsRedisFailureCounter(t *testing.T) {
 	require.Equal(t, 1, count)
 	require.Equal(t, autoDisableBackendRedis, backend)
 
-	disableChannelNow(*types.NewChannelError(21, constant.ChannelTypeOpenAI, "redis-reset-channel", false, "sk-disable", true), "test disable")
+	disabled := disableChannelNow(*types.NewChannelError(21, constant.ChannelTypeOpenAI, "redis-reset-channel", false, "sk-disable", true), "test disable")
 
+	require.True(t, disabled)
 	require.False(t, server.Exists(key))
+}
+
+func TestDisableChannelReportsWhenThresholdNotReached(t *testing.T) {
+	withDisabledRedis(t)
+	withAutoDisablePolicy(t, true, 2)
+
+	disabled := DisableChannel(
+		*types.NewChannelError(22, constant.ChannelTypeOpenAI, "threshold-test", false, "sk-threshold", true),
+		"test failure",
+	)
+
+	require.False(t, disabled)
+}
+
+func TestDisableChannelNowReportsFailedStatusUpdate(t *testing.T) {
+	truncate(t)
+
+	disabled := disableChannelNow(
+		*types.NewChannelError(999999, constant.ChannelTypeOpenAI, "missing-channel", false, "", true),
+		"test failure",
+	)
+
+	require.False(t, disabled)
 }
 
 func TestRecordChannelAutoDisableFailureUsesConfiguredThreshold(t *testing.T) {
