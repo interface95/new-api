@@ -57,6 +57,14 @@ type Channel struct {
 
 	// cache info
 	Keys []string `json:"-" gorm:"-"`
+
+	SuccessRate         *float64  `json:"success_rate,omitempty" gorm:"-"`
+	RecentSuccessRates  []float64 `json:"recent_success_rates,omitempty" gorm:"-"`
+	RecentBucketTs      []int64   `json:"recent_bucket_ts,omitempty" gorm:"-"`
+	RecentSuccessCounts []int64   `json:"recent_success_counts,omitempty" gorm:"-"`
+	RecentFailureCounts []int64   `json:"recent_failure_counts,omitempty" gorm:"-"`
+	LatestBucketTs      int64     `json:"latest_bucket_ts,omitempty" gorm:"-"`
+	MetricBucketSeconds int64     `json:"metric_bucket_seconds,omitempty" gorm:"-"`
 }
 
 type ChannelInfo struct {

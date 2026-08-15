@@ -1,15 +1,15 @@
-package perf_metrics_setting
+package channel_metrics_setting
 
 import "github.com/QuantumNous/new-api/setting/config"
 
-type PerfMetricsSetting struct {
+type ChannelMetricsSetting struct {
 	Enabled       bool   `json:"enabled"`
 	FlushInterval int    `json:"flush_interval"`
 	BucketTime    string `json:"bucket_time"`
 	RetentionDays int    `json:"retention_days"`
 }
 
-var perfMetricsSetting = PerfMetricsSetting{
+var channelMetricsSetting = ChannelMetricsSetting{
 	Enabled:       true,
 	FlushInterval: 5,
 	BucketTime:    "minute",
@@ -17,15 +17,15 @@ var perfMetricsSetting = PerfMetricsSetting{
 }
 
 func init() {
-	config.GlobalConfig.Register("perf_metrics_setting", &perfMetricsSetting)
+	config.GlobalConfig.Register("channel_metrics_setting", &channelMetricsSetting)
 }
 
-func GetSetting() PerfMetricsSetting {
-	return perfMetricsSetting
+func GetSetting() ChannelMetricsSetting {
+	return channelMetricsSetting
 }
 
 func GetBucketSeconds() int64 {
-	switch perfMetricsSetting.BucketTime {
+	switch channelMetricsSetting.BucketTime {
 	case "minute":
 		return 60
 	case "5min":
@@ -38,8 +38,8 @@ func GetBucketSeconds() int64 {
 }
 
 func GetFlushIntervalMinutes() int {
-	if perfMetricsSetting.FlushInterval < 1 {
+	if channelMetricsSetting.FlushInterval < 1 {
 		return 1
 	}
-	return perfMetricsSetting.FlushInterval
+	return channelMetricsSetting.FlushInterval
 }

@@ -19,7 +19,7 @@ var hotBuckets sync.Map
 // seriesSchema is a stable client cache/schema marker. Do not change it when
 // hiding fields or making response-only privacy hardening changes.
 const seriesSchema = "dbcd0a3c01b55203"
-const summaryRecentBucketLimit = 14
+const summaryRecentBucketLimit = 40
 
 func Init() {
 	go flushLoop()
@@ -184,13 +184,17 @@ func QuerySummaryAll(hours int, groups []string) (SummaryAllResult, error) {
 			avgTps = float64(total.outputTokens) / (float64(total.generationMs) / 1000.0)
 		}
 		models = append(models, ModelSummary{
-			ModelName:          name,
-			AvgLatencyMs:       avgLatency,
-			SuccessRate:        math.Round(successRate*100) / 100,
-			AvgTps:             math.Round(avgTps*100) / 100,
-			RecentSuccessRates: recentSuccessRates(modelBuckets[name], summaryRecentBucketLimit),
-			LatestBucketTs:     latestBucketTs(modelBuckets[name]),
-			RequestCount:       total.requestCount,
+			ModelName:           name,
+			AvgLatencyMs:        avgLatency,
+			SuccessRate:         math.Round(successRate*100) / 100,
+			AvgTps:              math.Round(avgTps*100) / 100,
+			RecentSuccessRates:  recentSuccessRates(modelBuckets[name], summaryRecentBucketLimit),
+			RecentBucketTs:      recentBucketTimestamps(modelBuckets[name], summaryRecentBucketLimit),
+			RecentSuccessCounts: recentSuccessCounts(modelBuckets[name], summaryRecentBucketLimit),
+			RecentFailureCounts: recentFailureCounts(modelBuckets[name], summaryRecentBucketLimit),
+			LatestBucketTs:      latestBucketTs(modelBuckets[name]),
+			MetricBucketSeconds: perf_metrics_setting.GetBucketSeconds(),
+			RequestCount:        total.requestCount,
 		})
 	}
 	sort.Slice(models, func(i, j int) bool {
@@ -265,6 +269,55 @@ func recentSuccessRates(buckets map[int64]counters, limit int) []float64 {
 		rates = append(rates, math.Round(successRate(buckets[ts])*100)/100)
 	}
 	return rates
+}
+
+// recentBucketTimestamps returns the timestamps of the most recent buckets, in
+// the same order (oldest->newest) as recentSuccessRates, so the frontend can zip
+// each status-bar segment to its bucket time for hover tooltips.
+func recentBucketTimestamps(buckets map[int64]counters, limit int) []int64 {
+	if len(buckets) == 0 || limit <= 0 {
+		return nil
+	}
+	timestamps := make([]int64, 0, len(buckets))
+	for ts := range buckets {
+		timestamps = append(timestamps, ts)
+	}
+	sort.Slice(timestamps, func(i, j int) bool {
+		return timestamps[i] < timestamps[j]
+	})
+	if len(timestamps) > limit {
+		timestamps = timestamps[len(timestamps)-limit:]
+	}
+	return timestamps
+}
+
+func recentSuccessCounts(buckets map[int64]counters, limit int) []int64 {
+	timestamps := recentBucketTimestamps(buckets, limit)
+	if len(timestamps) == 0 {
+		return nil
+	}
+	counts := make([]int64, 0, len(timestamps))
+	for _, ts := range timestamps {
+		counts = append(counts, buckets[ts].successCount)
+	}
+	return counts
+}
+
+func recentFailureCounts(buckets map[int64]counters, limit int) []int64 {
+	timestamps := recentBucketTimestamps(buckets, limit)
+	if len(timestamps) == 0 {
+		return nil
+	}
+	counts := make([]int64, 0, len(timestamps))
+	for _, ts := range timestamps {
+		value := buckets[ts]
+		failed := value.requestCount - value.successCount
+		if failed < 0 {
+			failed = 0
+		}
+		counts = append(counts, failed)
+	}
+	return counts
 }
 
 func allowedGroupSet(groups []string) map[string]struct{} {

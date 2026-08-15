@@ -4,6 +4,8 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"mime"
+	"path/filepath"
 	"strings"
 
 	"context"
@@ -390,12 +392,29 @@ func OpenAIChatRequestToClaudeMessages(c context.Context, info convmeta.Meta, te
 					}
 				default:
 					source := mediaMessage.ToFileSource()
+					if file := mediaMessage.GetFile(); file != nil && file.FileData != "" {
+						mimeType := mime.TypeByExtension(filepath.Ext(file.FileName))
+						source = types.NewFileSourceFromData(file.FileData, mimeType)
+					}
 					if source == nil {
 						continue
 					}
 					base64Data, mimeType, err := relaymedia.ResolveBase64Data(c, source, "formatting image for Claude")
 					if err != nil {
 						return nil, fmt.Errorf("get file data failed: %s", err.Error())
+					}
+					if strings.HasPrefix(mimeType, "text/") {
+						decodedText, err := base64.StdEncoding.DecodeString(base64Data)
+						if err != nil {
+							return nil, fmt.Errorf("decode text file failed: %s", err.Error())
+						}
+						if len(decodedText) > 0 {
+							claudeMediaMessages = append(claudeMediaMessages, dto.ClaudeMediaMessage{
+								Type: "text",
+								Text: kitutil.GetPointer(string(decodedText)),
+							})
+						}
+						continue
 					}
 					claudeMediaMessage := dto.ClaudeMediaMessage{
 						Source: &dto.ClaudeMessageSource{
