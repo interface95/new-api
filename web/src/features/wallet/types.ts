@@ -280,6 +280,12 @@ export interface TopupRecord {
   id: number
   /** User ID */
   user_id: number
+  /** Latest user wallet information, included only in admin billing history */
+  user?: {
+    username: string
+    quota: number
+    used_quota: number
+  } | null
   /** Topup amount (quota) */
   amount: number
   /** Payment amount (actual money paid) */

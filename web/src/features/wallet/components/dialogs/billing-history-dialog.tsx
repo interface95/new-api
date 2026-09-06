@@ -16,7 +16,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { Search, Copy, Check, ChevronLeft, ChevronRight } from 'lucide-react'
+import {
+  Search,
+  Copy,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  UserRound,
+  ReceiptText,
+} from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -32,9 +40,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import {
   Select,
   SelectContent,
@@ -43,10 +52,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard'
 import { formatCurrencyFromUSD } from '@/lib/currency'
-import { formatNumber } from '@/lib/format'
+import { formatNumber, formatQuota } from '@/lib/format'
 
 import { useBillingHistory } from '../../hooks/use-billing-history'
 import {
@@ -128,7 +138,7 @@ export function BillingHistoryDialog({
               ]}
               value={pageSize.toString()}
               onValueChange={(value) =>
-                value !== null && handlePageSizeChange(parseInt(value))
+                value !== null && handlePageSizeChange(Number.parseInt(value))
               }
             >
               <SelectTrigger className='h-9 w-[92px] sm:w-32'>
@@ -147,10 +157,10 @@ export function BillingHistoryDialog({
 
           {/* Records List */}
           <div className='max-h-[min(54vh,520px)] overflow-y-auto pr-1'>
-            {loading ? (
+            {loading && (
               <div className='space-y-3'>
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className='rounded-lg border p-3 sm:p-4'>
+                {['first', 'second', 'third', 'fourth', 'fifth'].map((key) => (
+                  <div key={key} className='rounded-lg border p-3 sm:p-4'>
                     <div className='flex items-start justify-between'>
                       <div className='flex-1 space-y-2'>
                         <Skeleton className='h-4 w-48' />
@@ -166,7 +176,8 @@ export function BillingHistoryDialog({
                   </div>
                 ))}
               </div>
-            ) : records.length === 0 ? (
+            )}
+            {!loading && records.length === 0 && (
               <div className='text-muted-foreground flex min-h-40 flex-col items-center justify-center py-10 text-center'>
                 <p className='text-sm font-medium'>
                   {t('No billing records found')}
@@ -177,101 +188,155 @@ export function BillingHistoryDialog({
                     : t('Your transaction history will appear here')}
                 </p>
               </div>
-            ) : (
+            )}
+            {!loading && records.length > 0 && (
               <div className='space-y-3'>
                 {records.map((record) => {
                   const statusConfig = getStatusConfig(record.status)
                   return (
-                    <div
+                    <article
                       key={record.id}
-                      className='rounded-lg border p-3 sm:p-4'
+                      className='bg-card overflow-hidden rounded-xl border'
                     >
-                      {/* Header Row */}
-                      <div className='flex items-start justify-between gap-2'>
-                        <div className='flex-1 space-y-1'>
-                          <div className='flex min-w-0 items-center gap-2'>
-                            <code className='text-foreground truncate font-mono text-sm'>
-                              {record.trade_no}
-                            </code>
-                            <Button
-                              variant='ghost'
-                              size='sm'
-                              className='h-5 w-5 p-0'
-                              onClick={() => copyToClipboard(record.trade_no)}
-                            >
-                              {copiedText === record.trade_no ? (
-                                <Check className='h-3 w-3' />
+                      <header className='flex items-start justify-between gap-3 px-4 pt-4 sm:px-5'>
+                        <div className='flex min-w-0 flex-1 items-start gap-3'>
+                          <Avatar size='lg' aria-hidden='true'>
+                            <AvatarFallback>
+                              {isAdmin ? (
+                                <UserRound className='size-5' />
                               ) : (
-                                <Copy className='h-3 w-3' />
+                                <ReceiptText className='size-5' />
                               )}
-                            </Button>
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className='flex min-w-0 flex-1 flex-col gap-1'>
+                            {isAdmin ? (
+                              <dl>
+                                <dt className='sr-only'>{t('Username')}</dt>
+                                <dd className='text-base leading-snug font-semibold break-all'>
+                                  {record.user?.username ||
+                                    t('User unavailable')}
+                                </dd>
+                              </dl>
+                            ) : (
+                              <p className='text-base leading-snug font-semibold'>
+                                {t('Recharge')}
+                              </p>
+                            )}
                             {isAdmin && record.user_id != null && (
                               <StatusBadge
                                 label={`${t('User ID')}: ${record.user_id}`}
                                 variant='neutral'
-                                size='sm'
+                                type='text'
+                                className='w-fit text-xs'
                                 copyText={String(record.user_id)}
                               />
                             )}
                           </div>
-                          <div className='text-muted-foreground text-xs'>
-                            {formatTimestamp(record.create_time)}
-                          </div>
                         </div>
                         <StatusBadge
-                          label={statusConfig.label}
+                          label={t(statusConfig.label)}
                           variant={statusConfig.variant}
+                          type='badge'
+                          className='shrink-0'
                           showDot
                           copyable={false}
                         />
-                      </div>
+                      </header>
 
-                      {/* Details Grid */}
-                      <div className='mt-3 grid grid-cols-2 gap-3 sm:mt-4 sm:grid-cols-3 sm:gap-4'>
-                        <div className='space-y-1'>
-                          <Label className='text-muted-foreground text-xs'>
-                            {t('Payment Method')}
-                          </Label>
-                          <div className='text-sm font-medium'>
-                            {getPaymentMethodName(record.payment_method, t)}
-                          </div>
-                        </div>
-                        <div className='space-y-1'>
-                          <Label className='text-muted-foreground text-xs'>
-                            {t('Amount')}
-                          </Label>
-                          <div className='text-sm font-semibold'>
+                      <dl className='grid grid-cols-2 items-start gap-x-5 gap-y-4 px-4 py-4 sm:grid-cols-3 sm:px-5 sm:py-5'>
+                        <div className='col-span-2 flex min-w-0 flex-col gap-1.5 sm:col-span-1'>
+                          <dt className='text-muted-foreground text-xs'>
+                            {t('Recharge Amount')}
+                          </dt>
+                          <dd className='text-2xl leading-tight font-semibold tracking-tight break-all tabular-nums sm:text-3xl'>
                             {formatCurrencyFromUSD(record.amount, {
                               digitsLarge: 2,
                               digitsSmall: 2,
                               abbreviate: false,
                             })}
-                          </div>
+                          </dd>
+                          <dd className='text-muted-foreground flex flex-wrap items-center gap-x-2 gap-y-1 text-xs'>
+                            <span>
+                              {t('Payment')}{' '}
+                              <span className='text-foreground font-medium tabular-nums'>
+                                {formatNumber(record.money)}
+                              </span>
+                            </span>
+                            <Badge variant='secondary'>
+                              <span className='sr-only'>
+                                {t('Payment Method')}:{' '}
+                              </span>
+                              {getPaymentMethodName(record.payment_method, t)}
+                            </Badge>
+                          </dd>
                         </div>
-                        <div className='space-y-1'>
-                          <Label className='text-muted-foreground text-xs'>
-                            {t('Payment')}
-                          </Label>
-                          <div className='text-sm font-semibold text-red-600'>
-                            {formatNumber(record.money)}
-                          </div>
-                        </div>
-                      </div>
+                        {isAdmin && (
+                          <>
+                            <div className='flex min-w-0 flex-col gap-1.5'>
+                              <dt className='text-muted-foreground text-xs'>
+                                {t('Current Quota')}
+                              </dt>
+                              <dd className='text-lg leading-tight font-semibold break-all tabular-nums sm:text-xl'>
+                                {record.user
+                                  ? formatQuota(record.user.quota)
+                                  : '—'}
+                              </dd>
+                            </div>
+                            <div className='flex min-w-0 flex-col gap-1.5'>
+                              <dt className='text-muted-foreground text-xs'>
+                                {t('Total Historical Quota')}
+                              </dt>
+                              <dd className='text-lg leading-tight font-semibold break-all tabular-nums sm:text-xl'>
+                                {record.user
+                                  ? formatQuota(
+                                      record.user.quota + record.user.used_quota
+                                    )
+                                  : '—'}
+                              </dd>
+                            </div>
+                          </>
+                        )}
+                      </dl>
 
-                      {/* Admin Actions */}
-                      {isAdmin && record.status === 'pending' && (
-                        <div className='mt-4 flex justify-end'>
+                      <Separator />
+                      <footer className='bg-muted/25 flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5'>
+                        <div className='flex min-w-0 flex-1 flex-col gap-1'>
+                          <div className='text-muted-foreground flex min-w-0 items-center gap-1.5'>
+                            <code className='min-w-0 font-mono text-xs break-all'>
+                              {record.trade_no}
+                            </code>
+                            <Button
+                              variant='ghost'
+                              size='icon'
+                              aria-label={`${t('Copy')} ${record.trade_no}`}
+                              className='size-11 shrink-0 sm:size-6'
+                              onClick={() => copyToClipboard(record.trade_no)}
+                            >
+                              {copiedText === record.trade_no ? (
+                                <Check className='size-3.5' />
+                              ) : (
+                                <Copy className='size-3.5' />
+                              )}
+                            </Button>
+                          </div>
+                          <time className='text-muted-foreground text-xs tabular-nums'>
+                            {formatTimestamp(record.create_time)}
+                          </time>
+                        </div>
+                        {isAdmin && record.status === 'pending' && (
                           <Button
                             size='sm'
                             variant='outline'
+                            className='h-11 shrink-0 px-4 sm:h-8'
                             onClick={() => setConfirmTradeNo(record.trade_no)}
                             disabled={completing}
                           >
                             {t('Complete Order')}
                           </Button>
-                        </div>
-                      )}
-                    </div>
+                        )}
+                      </footer>
+                    </article>
                   )
                 })}
               </div>
