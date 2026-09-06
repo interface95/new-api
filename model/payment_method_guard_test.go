@@ -121,6 +121,10 @@ func TestRechargeBepusdt_RejectsMismatchedPaymentMethod(t *testing.T) {
 func TestRechargeBepusdt_CreditsQuotaOnce(t *testing.T) {
 	truncateTables(t)
 
+	oldQuotaPerUnit := common.QuotaPerUnit
+	common.QuotaPerUnit = 2_500_000_000
+	t.Cleanup(func() { common.QuotaPerUnit = oldQuotaPerUnit })
+
 	insertUserForPaymentGuardTest(t, 103, 100)
 	insertTopUpForPaymentGuardTest(t, "bepusdt-idempotent", 103, PaymentProviderBepusdt)
 
@@ -130,7 +134,7 @@ func TestRechargeBepusdt_CreditsQuotaOnce(t *testing.T) {
 	topUp := GetTopUpByTradeNo("bepusdt-idempotent")
 	require.NotNil(t, topUp)
 	assert.Equal(t, common.TopUpStatusSuccess, topUp.Status)
-	assert.Equal(t, 100+int(common.QuotaPerUnit*2), getUserQuotaForPaymentGuardTest(t, 103))
+	assert.Equal(t, 5_000_000_100, getUserQuotaForPaymentGuardTest(t, 103))
 }
 
 func TestUpdatePendingTopUpStatus_RejectsMismatchedPaymentProvider(t *testing.T) {

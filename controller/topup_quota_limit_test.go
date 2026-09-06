@@ -59,10 +59,10 @@ func TestTopUpQuotaValidation(t *testing.T) {
 		wantErr     bool
 	}{
 		{
-			name:        "currency amount below limit",
+			name:        "large currency amount below wallet limit",
 			displayType: operation_setting.QuotaDisplayTypeUSD,
-			amount:      4294,
-			wantQuota:   2_147_000_000,
+			amount:      10_000,
+			wantQuota:   5_000_000_000,
 		},
 		{
 			name:        "currency amount above limit",
@@ -71,16 +71,28 @@ func TestTopUpQuotaValidation(t *testing.T) {
 			wantQuota:   2_147_500_000,
 		},
 		{
+			name:        "currency amount above wallet limit",
+			displayType: operation_setting.QuotaDisplayTypeUSD,
+			amount:      common.MaxWalletQuota/500_000 + 1,
+			wantErr:     true,
+		},
+		{
 			name:        "token amount preserves settlement truncation",
 			displayType: operation_setting.QuotaDisplayTypeTokens,
-			amount:      2_147_500_000,
-			wantQuota:   2_147_500_000,
+			amount:      5_000_123_456,
+			wantQuota:   5_000_000_000,
 		},
 		{
 			name:        "token amount above legacy int32 range",
 			displayType: operation_setting.QuotaDisplayTypeTokens,
 			amount:      4_294_500_000,
 			wantQuota:   4_294_500_000,
+		},
+		{
+			name:        "token amount above settlement limit",
+			displayType: operation_setting.QuotaDisplayTypeTokens,
+			amount:      common.MaxWalletQuota + 500_000,
+			wantErr:     true,
 		},
 	}
 
