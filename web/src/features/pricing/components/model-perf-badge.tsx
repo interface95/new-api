@@ -18,22 +18,29 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { cn } from '@/lib/utils'
-import {
-  getSuccessRateDotClass,
-  getSuccessRateTextClass,
-} from '@/features/performance-metrics/lib/format'
+
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import {
+  formatLatency,
+  formatThroughput,
+  getSuccessRateDotClass,
+  getSuccessRateTextClass,
+} from '@/features/performance-metrics/lib/format'
+import type { SuccessRatePoint } from '@/features/performance-metrics/types'
+import { cn } from '@/lib/utils'
 
 export type ModelPerfBadgeData = {
+  window_start?: number
+  window_end?: number
   avg_latency_ms: number
   success_rate: number
   avg_tps: number
+  recent_success_series?: SuccessRatePoint[]
   recent_success_rates?: number[]
   recent_bucket_ts?: number[]
   recent_success_counts?: number[]
@@ -42,8 +49,7 @@ export type ModelPerfBadgeData = {
   metric_bucket_seconds?: number
 }
 
-export interface ModelPerfBadgeProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+export interface ModelPerfBadgeProps extends React.HTMLAttributes<HTMLDivElement> {
   perf: ModelPerfBadgeData | undefined
 }
 
@@ -112,8 +118,11 @@ function formatBucketTooltip(
   if (!bar.ts) {
     return undefined
   }
-  const successCount = bar.successCount ?? 0
-  const failureCount = bar.failureCount ?? 0
+  if (bar.successCount == null || bar.failureCount == null) {
+    return `${formatBucketTimeRange(bar.ts, bucketSeconds)}\n${formatCompactSuccessRate(bar.rate)}`
+  }
+  const successCount = bar.successCount
+  const failureCount = bar.failureCount
   return `${formatBucketTimeRange(bar.ts, bucketSeconds)}\n${successCount} ${labels.success} / ${failureCount} ${labels.failed} (${formatCompactSuccessRate(bar.rate)})`
 }
 
@@ -147,13 +156,15 @@ function buildStatusBars(
         rate: Number.NaN,
       })
     ),
-    ...rates.map((rate, i): StatusBar => ({
-      key: `${timestamps[i] ?? 'missing'}-${rate}-${successCounts[i] ?? 0}-${failureCounts[i] ?? 0}`,
-      rate,
-      ts: timestamps[i],
-      successCount: successCounts[i],
-      failureCount: failureCounts[i],
-    })),
+    ...rates.map(
+      (rate, i): StatusBar => ({
+        key: `${timestamps[i] ?? 'missing'}-${rate}-${successCounts[i] ?? 0}-${failureCounts[i] ?? 0}`,
+        rate,
+        ts: timestamps[i],
+        successCount: successCounts[i],
+        failureCount: failureCounts[i],
+      })
+    ),
   ]
 }
 
@@ -162,107 +173,149 @@ export const ModelPerfBadge = memo(function ModelPerfBadge(
 ) {
   const { t } = useTranslation()
 
-  if (!props.perf) {
-    return null
+  const success_rate = props.perf?.success_rate ?? Number.NaN
+  const avg_latency_ms = props.perf?.avg_latency_ms ?? 0
+  const avg_tps = props.perf?.avg_tps ?? 0
+  const hasBucketMetrics = props.perf?.recent_success_rates != null
+  let statusBars: StatusBar[]
+  if (hasBucketMetrics) {
+    statusBars = buildStatusBars(
+      props.perf?.recent_success_rates ?? [],
+      props.perf?.recent_bucket_ts ?? [],
+      props.perf?.recent_success_counts ?? [],
+      props.perf?.recent_failure_counts ?? []
+    )
+  } else {
+    const windowStart = props.perf?.window_start
+    const ratesByHour = new Map(
+      (props.perf?.recent_success_series ?? []).map((point) => [
+        point.ts,
+        point.success_rate,
+      ])
+    )
+    statusBars = Array.from({ length: 24 }, (_, slot) => {
+      const ts = windowStart == null ? undefined : windowStart + slot * 3600
+      return {
+        key: `hour-${slot}`,
+        rate: ts == null ? Number.NaN : (ratesByHour.get(ts) ?? Number.NaN),
+        ts,
+      }
+    })
   }
-
-  const { avg_latency_ms, avg_tps, success_rate } = props.perf
-
-  const recentRates =
-    props.perf.recent_success_rates?.filter((rate) => Number.isFinite(rate)) ??
-    []
-  const statusBars = buildStatusBars(
-    recentRates,
-    props.perf.recent_bucket_ts ?? [],
-    props.perf.recent_success_counts ?? [],
-    props.perf.recent_failure_counts ?? []
-  )
-  const successRateLabel = formatCompactSuccessRate(success_rate)
-  const statusHeader = formatBucketTime(props.perf.latest_bucket_ts)
-  const bucketSeconds = props.perf.metric_bucket_seconds ?? 60
+  let latencyText = formatCompactLatency(avg_latency_ms)
+  let throughputText = formatCompactThroughput(avg_tps)
+  let successRateLabel = formatCompactSuccessRate(success_rate)
+  if (!hasBucketMetrics) {
+    latencyText = formatLatency(avg_latency_ms)
+    throughputText = formatThroughput(avg_tps).replace(' t/s', 't/s')
+    if (latencyText === '—') latencyText = '—s'
+    if (throughputText === '—') throughputText = '—t/s'
+    successRateLabel = Number.isFinite(success_rate)
+      ? `${success_rate.toFixed(2)}%`
+      : '—'
+  }
+  const statusHeader = formatBucketTime(props.perf?.latest_bucket_ts)
+  const bucketSeconds = hasBucketMetrics
+    ? (props.perf?.metric_bucket_seconds ?? 60)
+    : 3600
   const tooltipLabels = { success: t('Success'), failed: t('Failed') }
 
   return (
     <div
+      aria-label={t('Performance metrics for the last 24 hours')}
       className={cn(
-        'hidden w-[264px] flex-col gap-1.5 tabular-nums min-[520px]:flex xl:w-[278px]',
+        'flex w-full min-w-0 flex-wrap items-end justify-end gap-3 tabular-nums',
         props.className
       )}
     >
-      {/* Top: latency + throughput on the left, timestamp on the right, so the
+      <div className='flex min-w-0 grow basis-[278px] flex-col gap-1.5'>
+        {/* Top: latency + throughput on the left, timestamp on the right, so the
           success rate can align with the segment rail below. */}
-      <div className='flex items-start justify-between gap-x-3'>
-        <div className='flex gap-x-3'>
-          <div title={t('Average latency')} className='min-w-0'>
-            <div className='text-muted-foreground/55 text-[10px] leading-4'>
-              {t('Latency short')}
+        <div className='flex items-start justify-between gap-x-3'>
+          <div className='flex gap-x-3'>
+            <div title={t('Average latency')} className='min-w-0'>
+              <div className='text-muted-foreground/55 text-[10px] leading-4'>
+                {t('Latency short')}
+              </div>
+              <div className='text-muted-foreground/80 font-mono text-xs leading-4 whitespace-nowrap'>
+                {latencyText}
+              </div>
             </div>
-            <div className='text-muted-foreground/80 font-mono text-xs leading-4 whitespace-nowrap'>
-              {formatCompactLatency(avg_latency_ms)}
+            <div title={t('Throughput')} className='min-w-0'>
+              <div className='text-muted-foreground/55 truncate text-[10px] leading-4'>
+                {t('Throughput short')}
+              </div>
+              <div className='text-muted-foreground/80 font-mono text-xs leading-4 whitespace-nowrap'>
+                {throughputText}
+              </div>
             </div>
           </div>
-          <div title={t('Throughput')} className='min-w-0'>
-            <div className='text-muted-foreground/55 truncate text-[10px] leading-4'>
-              {t('Throughput short')}
-            </div>
-            <div className='text-muted-foreground/80 font-mono text-xs leading-4 whitespace-nowrap'>
-              {formatCompactThroughput(avg_tps)}
-            </div>
+          <div
+            title={`${t('Success rate')}: ${successRateLabel}`}
+            className='min-w-0'
+          >
+            <span className='text-muted-foreground/55 truncate text-[10px] leading-4'>
+              {statusHeader || t('Status')}
+            </span>
           </div>
         </div>
-        <div
-          title={`${t('Success rate')}: ${successRateLabel}`}
-          className='min-w-0'
-        >
-          <span className='text-muted-foreground/55 truncate text-[10px] leading-4'>
-            {statusHeader || t('Status short')}
+        {/* Bottom: thin 40-segment bar spanning the full badge width; each segment
+          shows its bucket time on hover. */}
+        <div className='flex h-5 items-center gap-2'>
+          <TooltipProvider delay={100}>
+            <div
+              role='img'
+              aria-label={t(
+                'Recent success-rate samples; gray bars indicate missing data.'
+              )}
+              className={cn(
+                'flex h-5 min-w-0 flex-1 items-center',
+                hasBucketMetrics ? 'gap-0.5' : 'gap-px'
+              )}
+            >
+              {statusBars.map((bar) => {
+                const tooltip = formatBucketTooltip(
+                  bar,
+                  bucketSeconds,
+                  tooltipLabels
+                )
+                return (
+                  <Tooltip key={bar.key}>
+                    <TooltipTrigger
+                      render={
+                        <span
+                          className={cn(
+                            'h-5 w-1 rounded-full',
+                            Number.isFinite(bar.rate) &&
+                              bar.rate >= 0 &&
+                              bar.rate <= 100
+                              ? getSuccessRateDotClass(bar.rate)
+                              : 'bg-muted-foreground/15'
+                          )}
+                        />
+                      }
+                    />
+                    {tooltip && (
+                      <TooltipContent side='top' className='font-mono'>
+                        <span className='whitespace-pre-line'>{tooltip}</span>
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
+                )
+              })}
+            </div>
+          </TooltipProvider>
+          <span
+            className={cn(
+              'shrink-0 font-mono text-xs leading-4 whitespace-nowrap',
+              getSuccessRateTextClass(success_rate)
+            )}
+          >
+            {successRateLabel}
           </span>
         </div>
       </div>
-      {/* Bottom: thin 40-segment bar spanning the full badge width; each segment
-          shows its bucket time on hover. */}
-      <div className='flex h-5 items-center gap-2'>
-        <TooltipProvider delay={100}>
-          <div className='flex h-5 min-w-0 flex-1 items-center gap-0.5'>
-            {statusBars.map((bar) => {
-              const tooltip = formatBucketTooltip(
-                bar,
-                bucketSeconds,
-                tooltipLabels
-              )
-              return (
-                <Tooltip key={bar.key}>
-                  <TooltipTrigger
-                    render={
-                      <span
-                        className={cn(
-                          'h-5 w-1 rounded-full',
-                          Number.isFinite(bar.rate)
-                            ? getSuccessRateDotClass(bar.rate)
-                            : 'bg-muted-foreground/15'
-                        )}
-                      />
-                    }
-                  />
-                  {tooltip && (
-                    <TooltipContent side='top' className='font-mono'>
-                      <span className='whitespace-pre-line'>{tooltip}</span>
-                    </TooltipContent>
-                  )}
-                </Tooltip>
-              )
-            })}
-          </div>
-        </TooltipProvider>
-        <span
-          className={cn(
-            'shrink-0 font-mono text-xs leading-4 whitespace-nowrap',
-            getSuccessRateTextClass(success_rate)
-          )}
-        >
-          {successRateLabel}
-        </span>
-      </div>
+      {props.children}
     </div>
   )
 })

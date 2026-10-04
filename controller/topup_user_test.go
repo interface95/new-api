@@ -83,10 +83,10 @@ func TestTopUpUserDetails(t *testing.T) {
 				model.DB, model.LOG_DB = previousDB, previousLogDB
 				common.SetDatabaseTypes(previousMainType, previousLogType)
 				common.RedisEnabled = previousRedis
-				require.NoError(t, db.Migrator().DropTable(&model.TopUp{}, &model.User{}))
+				require.NoError(t, db.Migrator().DropTable(&model.TopUp{}, &model.User{}, &model.UserAccessToken{}, &model.AuditLog{}))
 				require.NoError(t, connection.Close())
 			})
-			require.NoError(t, db.AutoMigrate(&model.User{}, &model.TopUp{}))
+			require.NoError(t, db.AutoMigrate(&model.User{}, &model.TopUp{}, &model.UserAccessToken{}, &model.AuditLog{}))
 			privateToken := "private-topup-test-token"
 			users := []model.User{
 				{Id: 101, Username: "alice-login", DisplayName: "Alice Display", Password: "test-only", Email: "private-topup@example.com", AccessToken: &privateToken, AffCode: "alice", Quota: 5_000_000_000, UsedQuota: 2_000_000_000, Role: common.RoleCommonUser, Status: common.UserStatusEnabled},
@@ -178,13 +178,15 @@ func TestTopUpUserDetails(t *testing.T) {
 				assert.Empty(t, searched.Data.Items)
 			})
 			t.Run("ordinary user cannot access admin list", func(t *testing.T) {
+				credential, _ := createScopedAccessToken(t, 101, time.Now().Add(time.Hour).Unix(), "wallet:read")
 				router := gin.New()
 				router.GET("/api/user/topup", middleware.AdminAuth(), GetAllTopUps)
 				request := httptest.NewRequest(http.MethodGet, "/api/user/topup", nil)
-				request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", privateToken))
+				request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", credential))
 				recorder := httptest.NewRecorder()
 				router.ServeHTTP(recorder, request)
 				assert.Equal(t, http.StatusForbidden, recorder.Code)
+				assert.Contains(t, recorder.Body.String(), "AUTH_INSUFFICIENT_PRIVILEGE")
 				assert.NotContains(t, recorder.Body.String(), "alice-login")
 			})
 		})

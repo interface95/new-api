@@ -18,8 +18,6 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import {
   Search,
-  Copy,
-  Check,
   ChevronLeft,
   ChevronRight,
   UserRound,
@@ -28,18 +26,10 @@ import {
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { ConfirmDialog } from '@/components/confirm-dialog'
+import { CopyButton } from '@/components/copy-button'
 import { Dialog } from '@/components/dialog'
 import { StatusBadge } from '@/components/status-badge'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -54,7 +44,6 @@ import {
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard'
 import { formatCurrencyFromUSD } from '@/lib/currency'
 import { formatNumber, formatQuota } from '@/lib/format'
 
@@ -91,7 +80,6 @@ export function BillingHistoryDialog({
   } = useBillingHistory()
 
   const [confirmTradeNo, setConfirmTradeNo] = useState<string | null>(null)
-  const { copyToClipboard, copiedText } = useCopyToClipboard({ notify: false })
 
   const totalPages = Math.ceil(total / pageSize)
 
@@ -113,7 +101,7 @@ export function BillingHistoryDialog({
         description={t(
           'View your topup transaction records and payment history'
         )}
-        contentClassName='flex max-h-[calc(100dvh-2rem)] flex-col max-sm:w-screen max-sm:max-w-none max-sm:rounded-none max-sm:p-4 sm:max-w-4xl'
+        contentClassName='flex max-h-(--dialog-available-height) flex-col max-sm:w-screen max-sm:max-w-none max-sm:rounded-none max-sm:p-4 sm:max-w-4xl'
         contentHeight='auto'
         bodyClassName='space-y-3'
       >
@@ -159,22 +147,27 @@ export function BillingHistoryDialog({
           <div className='max-h-[min(54vh,520px)] overflow-y-auto pr-1'>
             {loading && (
               <div className='space-y-3'>
-                {['first', 'second', 'third', 'fourth', 'fifth'].map((key) => (
-                  <div key={key} className='rounded-lg border p-3 sm:p-4'>
-                    <div className='flex items-start justify-between'>
-                      <div className='flex-1 space-y-2'>
-                        <Skeleton className='h-4 w-48' />
-                        <Skeleton className='h-3 w-32' />
+                {['first', 'second', 'third', 'fourth', 'fifth'].map(
+                  (placeholder) => (
+                    <div
+                      key={placeholder}
+                      className='rounded-lg border p-3 sm:p-4'
+                    >
+                      <div className='flex items-start justify-between'>
+                        <div className='flex-1 space-y-2'>
+                          <Skeleton className='h-4 w-48' />
+                          <Skeleton className='h-3 w-32' />
+                        </div>
+                        <Skeleton className='h-5 w-16' />
                       </div>
-                      <Skeleton className='h-5 w-16' />
+                      <div className='mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4'>
+                        <Skeleton className='h-3 w-full' />
+                        <Skeleton className='h-3 w-full' />
+                        <Skeleton className='h-3 w-full' />
+                      </div>
                     </div>
-                    <div className='mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4'>
-                      <Skeleton className='h-3 w-full' />
-                      <Skeleton className='h-3 w-full' />
-                      <Skeleton className='h-3 w-full' />
-                    </div>
-                  </div>
-                ))}
+                  )
+                )}
               </div>
             )}
             {!loading && records.length === 0 && (
@@ -306,19 +299,12 @@ export function BillingHistoryDialog({
                             <code className='min-w-0 font-mono text-xs break-all'>
                               {record.trade_no}
                             </code>
-                            <Button
-                              variant='ghost'
-                              size='icon'
+                            <CopyButton
+                              value={record.trade_no}
                               aria-label={`${t('Copy')} ${record.trade_no}`}
-                              className='size-11 shrink-0 sm:size-6'
-                              onClick={() => copyToClipboard(record.trade_no)}
-                            >
-                              {copiedText === record.trade_no ? (
-                                <Check className='size-3.5' />
-                              ) : (
-                                <Copy className='size-3.5' />
-                              )}
-                            </Button>
+                              className='size-11 sm:size-6'
+                              iconClassName='size-3.5'
+                            />
                           </div>
                           <time className='text-muted-foreground text-xs tabular-nums'>
                             {formatTimestamp(record.create_time)}
@@ -381,32 +367,17 @@ export function BillingHistoryDialog({
       </Dialog>
 
       {/* Confirm Complete Order Dialog */}
-      <AlertDialog
+      <ConfirmDialog
         open={!!confirmTradeNo}
         onOpenChange={(open) => !open && setConfirmTradeNo(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t('Complete Order')}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t(
-                'Are you sure you want to manually complete this order? The user will be credited with the corresponding quota.'
-              )}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={completing}>
-              {t('Cancel')}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleConfirmComplete}
-              disabled={completing}
-            >
-              {completing ? t('Processing...') : t('Confirm')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        title={t('Complete Order')}
+        desc={t(
+          'Are you sure you want to manually complete this order? The user will be credited with the corresponding quota.'
+        )}
+        confirmText={completing ? t('Processing...') : t('Confirm')}
+        handleConfirm={handleConfirmComplete}
+        isLoading={completing}
+      />
     </>
   )
 }
