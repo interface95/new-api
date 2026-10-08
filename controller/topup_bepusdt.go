@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -87,6 +88,13 @@ func RequestBepusdtPay(c *gin.Context) {
 		return
 	}
 
+	user, err := model.GetUserById(id, false)
+	if err != nil {
+		logger.LogError(c.Request.Context(), fmt.Sprintf("BEpusdt 获取下单用户失败 user_id=%d error=%q", id, err.Error()))
+		c.JSON(http.StatusOK, gin.H{"message": "error", "data": "获取用户信息失败"})
+		return
+	}
+
 	tradeNo := fmt.Sprintf("BEPUSDT-%d-%d-%s", id, time.Now().UnixMilli(), randstr.String(6))
 	topUp := &model.TopUp{
 		UserId:          id,
@@ -117,6 +125,9 @@ func RequestBepusdtPay(c *gin.Context) {
 		Currencies:  setting.BepusdtCurrencies,
 		Fiat:        setting.BepusdtFiat,
 		Name:        paymentName,
+		UserID:      strconv.Itoa(user.Id),
+		Username:    user.Username,
+		DisplayName: user.DisplayName,
 	})
 	if err != nil {
 		logger.LogError(c.Request.Context(), fmt.Sprintf("BEpusdt 创建支付交易失败 user_id=%d trade_no=%s error=%q", id, tradeNo, err.Error()))

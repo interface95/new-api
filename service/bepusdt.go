@@ -13,6 +13,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+	"unicode"
+	"unicode/utf8"
 
 	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/relaykit/dto"
@@ -45,6 +47,9 @@ type BepusdtCreateOrderParams struct {
 	Currencies  string `json:"currencies"`
 	Fiat        string `json:"fiat"`
 	Name        string `json:"name,omitempty"`
+	UserID      string `json:"user_id,omitempty"`
+	Username    string `json:"username,omitempty"`
+	DisplayName string `json:"display_name,omitempty"`
 }
 
 type BepusdtCreateTransactionResult struct {
@@ -82,7 +87,9 @@ func SignBepusdtParams(params map[string]interface{}, authToken string) string {
 		pairs = append(pairs, fmt.Sprintf("%s=%v", key, params[key]))
 	}
 
-	sum := md5.Sum([]byte(strings.Join(pairs, "&") + authToken))
+	// Match BEpusdt's existing trailing-delimiter rule without changing the transmitted values.
+	canonical := strings.TrimRight(strings.Join(pairs, "&"), "&")
+	sum := md5.Sum([]byte(canonical + authToken))
 	return strings.ToLower(hex.EncodeToString(sum[:]))
 }
 
@@ -154,7 +161,7 @@ func CreateBepusdtOrder(ctx context.Context, params BepusdtCreateOrderParams) (*
 	}
 	amountValue, _ := amountDecimal.Float64()
 
-	requestParams := map[string]interface{}{
+	requestParams := map[string]any{
 		"order_id":     params.OrderID,
 		"amount":       amountValue,
 		"notify_url":   params.NotifyURL,
@@ -166,6 +173,30 @@ func CreateBepusdtOrder(ctx context.Context, params BepusdtCreateOrderParams) (*
 	}
 	if strings.TrimSpace(params.Name) != "" {
 		requestParams["name"] = params.Name
+	}
+	// Validate before omitting optional blank names so whitespace controls are still rejected.
+	for _, field := range []struct {
+		key, value string
+		maxLength  int
+	}{
+		{"user_id", params.UserID, 64},
+		{"username", params.Username, 64},
+		{"display_name", params.DisplayName, 128},
+	} {
+		if field.value == "" {
+			continue
+		}
+		if !utf8.ValidString(field.value) ||
+			utf8.RuneCountInString(field.value) > field.maxLength || strings.ContainsFunc(field.value, unicode.IsControl) {
+			return nil, fmt.Errorf("%w: invalid %s", ErrBepusdtConfigInvalid, field.key)
+		}
+		if field.key == "user_id" && strings.ContainsFunc(field.value, func(r rune) bool { return r < '0' || r > '9' }) {
+			return nil, fmt.Errorf("%w: invalid %s", ErrBepusdtConfigInvalid, field.key)
+		}
+		if field.key != "user_id" && strings.TrimSpace(field.value) == "" {
+			continue
+		}
+		requestParams[field.key] = field.value
 	}
 
 	return createBepusdtPayment(ctx, gatewayURL, authToken, bepusdtCreateOrderPath, requestParams)
